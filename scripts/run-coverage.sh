@@ -1,8 +1,7 @@
 # runs the coverage test, building HTML display of test-covered code
-#qmake CONFIG+=gcov CONFIG+=aegis
-#make qmake
-#make clean
-#make -j4
+# build first with coverage instrumentation, e.g.
+#cmake -S . -B build -DBUILD_TESTS=ON -DCMAKE_CXX_FLAGS=--coverage
+#cmake --build build -j4
 cd "$(dirname "$0")/.." || exit 1   # run from the repository root
 for i in test/00/*; do
     sh $i

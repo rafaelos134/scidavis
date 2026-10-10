@@ -9,8 +9,7 @@
 Makefile
 build/
 build-*/
+build-compiletest/
 CMakeLists.txt.user*
 
-# Obsolete Qt 5 submodule checkout (replaced by 3rdparty/qwt5)
-3rdparty/qwt5-qt5/
 aqtinstall.log

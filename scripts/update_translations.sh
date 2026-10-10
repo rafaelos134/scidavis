@@ -6,8 +6,8 @@ rm -rf scidavis/oldtranslations
 mkdir scidavis/oldtranslations
 # copy old translation files
 cp scidavis/translations/*.ts scidavis/oldtranslations/
-# run lupdate to generate new files
-lupdate -noobsolete scidavis.pro
+# run lupdate (Qt 6, override with LUPDATE=/path/to/lupdate) to generate new files
+${LUPDATE:-lupdate} -noobsolete libscidavis/src scidavis/src -ts scidavis/translations/*.ts
 # run python script to merge translated lines from old translations into new
 python3 scripts/translation_updater.py scidavis/oldtranslations scidavis/translations
 # remove temporary directory

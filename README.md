@@ -47,12 +47,9 @@ C++20 com Qt 6 (6.8 LTS). Roda em Linux, Windows e macOS.
 
 ```
 scidavis/
-├── CMakeLists.txt          # Build (CMake) — único suportado
-├── scidavis.pro, config.pri# Build legado (qmake, Qt 5) — NÃO funciona mais, só histórico
+├── CMakeLists.txt          # Build (CMake)
 ├── libscidavis/            # >>> Biblioteca com TODA a lógica do programa <<<
-│   ├── CMakeLists.txt      #   lista de fontes para o CMake
-│   ├── sourcefiles.pri     #   lista de fontes do qmake legado
-│   ├── python.pri          #   bindings Python (qmake legado)
+│   ├── CMakeLists.txt      #   lista de fontes
 │   └── src/                #   código-fonte (ver seção 3)
 ├── scidavis/               # Executável: main.cpp, ícones, traduções, .desktop, scidavisrc.py
 │   ├── src/main.cpp        #   ponto de entrada
@@ -322,7 +319,8 @@ portado para Qt 6/PyQt6 e gera erro se ativado.
 | `scripts/makeDist.sh` | Gera o tarball de código-fonte (inclui submódulos) |
 | `scripts/update_translations.sh` (`.bat`) | Atualiza os `.ts` preservando traduções existentes |
 | `scripts/pre-commit.py` | Hook de git que aplica `clang-format` (`ln -s ../../scripts/pre-commit.py .git/hooks/pre-commit`) |
-| `scripts/run-coverage.sh`, `scripts/compileTest.sh` | Cobertura de testes e teste de compilação (qmake legado, não funcionam com Qt 6) |
+| `scripts/compileTest.sh` | Compila em Debug com todos os recursos opcionais ligados (`CMAKE_PREFIX_PATH` aponta para o Qt 6) |
+| `scripts/run-coverage.sh` | Relatório de cobertura (lcov) a partir de um build com `--coverage` |
 | `packaging/makeMsi.sh`, `packaging/mkMacDist.sh` | Instalador MSI (Windows) e bundle `.app`/`.pkg` (macOS) |
 
 Todos os scripts podem ser chamados de qualquer diretório — eles mudam para a
