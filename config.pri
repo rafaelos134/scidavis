@@ -270,7 +270,7 @@ osx_dist {
 # this was an attempt to add a post build step. Doesn't seem to work,
 # so just run this step manually
         QMAKE_EXTRA_TARGETS += mac-dist
-        mac-dist.commands = sh mkMacDist.sh
+        mac-dist.commands = sh packaging/mkMacDist.sh
 
 }
 

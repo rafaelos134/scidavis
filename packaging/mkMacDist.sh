@@ -1,5 +1,6 @@
 #!/bin/bash
 # Create a distributable installable package
+cd "$(dirname "$0")/.." || exit 1   # run from the repository root
 
 if [ $# -gt 1 ]; then
     BUNDLE=$1
@@ -9,7 +10,7 @@ fi
 
 MAC_DIST_DIR=$BUNDLE/Contents/MacOS
 RES_DIR=$BUNDLE/Contents/Resources
-version=`grep scidavis_version libscidavis/src/version.cpp|tail -1|cut -f5 -d' '|tr -d '";'`
+version=`grep scidavis_version libscidavis/src/app/version.cpp|tail -1|cut -f5 -d' '|tr -d '";'`
 if [ $version = '"unknown"' ]; then
     version=0.0.0.0
 fi

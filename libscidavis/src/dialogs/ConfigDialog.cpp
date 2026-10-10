@@ -526,43 +526,54 @@ void ConfigDialog::initAppPage()
     boxStyle->addItems(styles);
     boxStyle->setCurrentIndex(boxStyle->findText(app->appStyle, Qt::MatchWildcard));
 
+    lblTheme = new QLabel();
+    topBoxLayout->addWidget(lblTheme, 2, 0);
+    boxTheme = new QComboBox();
+    boxTheme->addItems(QStringList() << QString() << QString()); // texts set in languageChange()
+    boxTheme->setCurrentIndex(app->appTheme == "dark" ? 1 : 0);
+    topBoxLayout->addWidget(boxTheme, 2, 1);
+    // the dark theme always uses the Fusion style
+    boxStyle->setEnabled(boxTheme->currentIndex() == 0);
+    connect(boxTheme, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+            [this](int index) { boxStyle->setEnabled(index == 0); });
+
     lblFonts = new QLabel();
-    topBoxLayout->addWidget(lblFonts, 2, 0);
+    topBoxLayout->addWidget(lblFonts, 3, 0);
     fontsBtn = new QPushButton();
-    topBoxLayout->addWidget(fontsBtn, 2, 1);
+    topBoxLayout->addWidget(fontsBtn, 3, 1);
 
     lblScriptingLanguage = new QLabel();
-    topBoxLayout->addWidget(lblScriptingLanguage, 3, 0);
+    topBoxLayout->addWidget(lblScriptingLanguage, 4, 0);
     boxScriptingLanguage = new QComboBox();
     QStringList llist = ScriptingLangManager::languages();
     boxScriptingLanguage->addItems(llist);
     boxScriptingLanguage->setCurrentIndex(llist.indexOf(app->defaultScriptingLang));
-    topBoxLayout->addWidget(boxScriptingLanguage, 3, 1);
+    topBoxLayout->addWidget(boxScriptingLanguage, 4, 1);
 
     boxSave = new QCheckBox();
     boxSave->setChecked(app->autoSave);
-    topBoxLayout->addWidget(boxSave, 4, 0);
+    topBoxLayout->addWidget(boxSave, 5, 0);
 
     boxMinutes = new QSpinBox();
     boxMinutes->setRange(1, 100);
     boxMinutes->setValue(app->autoSaveTime);
     boxMinutes->setEnabled(app->autoSave);
-    topBoxLayout->addWidget(boxMinutes, 4, 1);
+    topBoxLayout->addWidget(boxMinutes, 5, 1);
 
     lblUndoLimit = new QLabel();
-    topBoxLayout->addWidget(lblUndoLimit, 5, 0);
+    topBoxLayout->addWidget(lblUndoLimit, 6, 0);
     boxUndoLimit = new QSpinBox();
     boxUndoLimit->setRange(1, 10000);
     boxUndoLimit->setValue(app->undoLimit);
-    topBoxLayout->addWidget(boxUndoLimit, 5, 1);
+    topBoxLayout->addWidget(boxUndoLimit, 6, 1);
 
 #ifdef SEARCH_FOR_UPDATES
     boxSearchUpdates = new QCheckBox();
     boxSearchUpdates->setChecked(app->autoSearchUpdates);
-    topBoxLayout->addWidget(boxSearchUpdates, 6, 0, 1, 2);
+    topBoxLayout->addWidget(boxSearchUpdates, 7, 0, 1, 2);
 #endif
 
-    topBoxLayout->setRowStretch(7, 1);
+    topBoxLayout->setRowStretch(8, 1);
 
     appTabWidget->addTab(application, QString());
 
@@ -916,6 +927,9 @@ void ConfigDialog::languageChange()
 
     lblLanguage->setText(tr("Language"));
     lblStyle->setText(tr("Style"));
+    lblTheme->setText(tr("Theme"));
+    boxTheme->setItemText(0, tr("Default"));
+    boxTheme->setItemText(1, tr("Dark"));
     lblFonts->setText(tr("Main Font"));
     fontsBtn->setText(tr("Choose &font"));
     lblWorkspace->setText(tr("Workspace"));
@@ -1131,6 +1145,13 @@ void ConfigDialog::apply()
     app->changeAppFont(appFont);
     setFont(appFont);
     app->changeAppStyle(boxStyle->currentText());
+    const QString theme = boxTheme->currentIndex() == 1 ? "dark" : "default";
+    if (theme != app->appTheme) {
+        app->changeAppTheme(theme);
+        QMessageBox::information(this, tr("Theme"),
+                                 tr("Some icons will only match the new theme after "
+                                    "restarting SciDAVis."));
+    }
 #ifdef SEARCH_FOR_UPDATES
     app->autoSearchUpdates = boxSearchUpdates->isChecked();
 #endif

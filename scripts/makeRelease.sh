@@ -1,3 +1,4 @@
+cd "$(dirname "$0")/.." || exit 1   # run from the repository root
 echo "old version=`git describe`"
 fullversion=$1
 version=${fullversion%%-*}
@@ -12,8 +13,8 @@ major=${branch%.*}
 minor=${branch#*.}
 patch=${version##*.}
 scidavis_version=$[$major*65536 + $minor*256 + $patch]
-rm -f libscidavis/src/version.cpp
-cat >libscidavis/src/version.cpp <<EOF
+rm -f libscidavis/src/app/version.cpp
+cat >libscidavis/src/app/version.cpp <<EOF
 #include "globals.h"
 const int SciDAVis::scidavis_versionNo = $scidavis_version;
 const char* SciDAVis::scidavis_version = "$version";

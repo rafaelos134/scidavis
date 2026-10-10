@@ -1,9 +1,10 @@
 # Build an MSI installer from a compiled SciDAVis
-# Must be run from the toplevel directory of SciDAVis
+# Can be run from anywhere: it changes to the toplevel directory of SciDAVis
+cd "$(dirname "$0")/.." || exit 1   # run from the repository root
 PATH=$PATH:/c/cygwin/bin
 productId=`uuidgen`
 componentId=`uuidgen`
-version=`grep scidavis_version libscidavis/src/version.cpp|tail -1|cut -f5 -d' '|tr -d '";'`
+version=`grep scidavis_version libscidavis/src/app/version.cpp|tail -1|cut -f5 -d' '|tr -d '";'`
 if [ $version = '"unknown"' ]; then
     version=0.0.0.0
 fi

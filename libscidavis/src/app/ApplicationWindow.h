@@ -240,6 +240,12 @@ public slots:
     void applyUserSettings();
     void setSaveSettings(bool autoSaving, int min);
     void changeAppStyle(const QString &s);
+    //! Switch between the "default" (system) and "dark" themes
+    void changeAppTheme(const QString &theme);
+    //! Apply appTheme to the application palette, style and style sheet
+    void applyThemePalette();
+    //! Apply the theme and the user colors to the workspace and panels
+    void applyWorkspaceColors();
     void changeAppFont(const QFont &f);
     void updateAppFonts();
     void setAppColors(const QColor &wc, const QColor &pc, const QColor &tpc);
@@ -999,6 +1005,8 @@ public:
 
     QColor workspaceColor, panelsColor, panelsTextColor;
     QString appStyle, workingDir;
+    //! Either "default" (system look) or "dark"
+    QString appTheme;
 
     //! Path to the folder where the last template file was opened/saved
     QString templatesDir;

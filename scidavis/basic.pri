@@ -34,6 +34,7 @@ DESTDIR        = ./
 ###################### ICONS ################################################
 RESOURCES    +=        appicons.qrc
 RESOURCES    +=        icons.qrc
+RESOURCES    +=        styles.qrc
 RC_FILE      =         scidavis.rc
 
 win32 {

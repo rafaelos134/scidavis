@@ -5,228 +5,239 @@
 
 ###################### HEADERS ##############################################
 
-HEADERS  += src/ApplicationWindow.h \
-            src/IconLoader.h \
-            src/globals.h\
-            src/Graph.h \
-            src/Graph3D.h \
-            src/Table.h \
-            src/CurvesDialog.h \
-            src/PlotDialog.h \
-            src/Plot3DDialog.h \
-            src/PlotWizard.h \
-            src/ExportDialog.h \
-            src/AxesDialog.h \
-            src/PolynomFitDialog.h \
-            src/ExpDecayDialog.h \
-            src/FunctionDialog.h \
-            src/FitDialog.h \
-            src/SurfaceDialog.h \
-            src/TextDialog.h \
-            src/LineDialog.h \
-            src/ScalePicker.h \
-            src/TitlePicker.h \
-            src/CanvasPicker.h \
-            src/PlotCurve.h \
-            src/QwtErrorPlotCurve.h \
-            src/QwtPieCurve.h \
-            src/ErrDialog.h \
-            src/Legend.h \
-            src/ArrowMarker.h \
-            src/ImageMarker.h \
-            src/ImageDialog.h \
-            src/fit_gsl.h \
-            src/MultiLayer.h\
-            src/LayerDialog.h \
-            src/IntDialog.h \
-            src/Bar.h \
-            src/Cone3D.h \
-            src/ConfigDialog.h \
-            src/QwtBarCurve.h \
-            src/BoxCurve.h \
-            src/QwtHistogram.h \
-            src/VectorCurve.h \
-            src/ScaleDraw.h \
-            src/Matrix.h \
-            src/DataSetDialog.h \
-            src/MyParser.h \
-            src/SymbolBox.h \
-            src/PatternBox.h \
-            src/SymbolDialog.h \
-            src/Plot.h \
-            src/ColorButton.h \
-            src/AssociationsDialog.h \
-            src/RenameWindowDialog.h \
-            src/MyWidget.h \
-            src/InterpolationDialog.h\
-            src/ImportASCIIDialog.h \
-            src/ImageExportDialog.h\
-            src/SmoothCurveDialog.h\
-            src/FilterDialog.h\
-            src/FFTDialog.h\
-            src/Note.h\
-            src/Folder.h\
-            src/FindDialog.h\
-            src/ScriptingEnv.h\
-            src/Script.h\
-            src/ScriptEdit.h\
-            src/FunctionCurve.h\
-            src/Fit.h\
-            src/MultiPeakFit.h\
-            src/ExponentialFit.h\
-            src/PolynomialFit.h\
-            src/NonLinearFit.h\
-            src/PluginFit.h\
-            src/SigmoidalFit.h\
-            src/customevents.h\
-            src/ScriptingLangDialog.h\
-            src/TextFormatButtons.h\
-            src/TableStatistics.h\
-            src/Spectrogram.h\
-            src/ColorMapEditor.h\
-            src/SelectionMoveResizer.h\
-            src/Filter.h\
-            src/Differentiation.h\
-            src/Integration.h\
-            src/Interpolation.h\
-            src/SmoothFilter.h\
-            src/FFTFilter.h\
-            src/FFT.h\
-            src/Convolution.h\
-            src/Correlation.h\
-            src/PlotToolInterface.h\
-            src/ScreenPickerTool.h\
-            src/DataPickerTool.h\
-            src/RangeSelectorTool.h\
-            src/TranslateCurveTool.h\
-            src/MultiPeakFitTool.h\
-            src/CurveRangeDialog.h\
-            src/LineProfileTool.h\
-            src/PlotEnrichement.h\
-            src/ExtensibleFileDialog.h\
-            src/OpenProjectDialog.h\
-        src/Grid.h\
-            src/DataPointPicker.h \
-            src/TeXTableSettings.h \
-            src/TeXTableSettingsWidget.h \
-            src/TeXTableExportDialog.h \
-            src/PenWidget.h \
-            src/QStringStdString.h
+HEADERS  += src/app/ApplicationWindow.h \
+            src/app/IconLoader.h \
+            src/app/globals.h\
+            src/plot/Graph.h \
+            src/plot/3d/Graph3D.h \
+            src/project/Table.h \
+            src/dialogs/CurvesDialog.h \
+            src/dialogs/PlotDialog.h \
+            src/dialogs/Plot3DDialog.h \
+            src/dialogs/PlotWizard.h \
+            src/dialogs/ExportDialog.h \
+            src/dialogs/AxesDialog.h \
+            src/dialogs/PolynomFitDialog.h \
+            src/dialogs/ExpDecayDialog.h \
+            src/dialogs/FunctionDialog.h \
+            src/dialogs/FitDialog.h \
+            src/dialogs/SurfaceDialog.h \
+            src/dialogs/TextDialog.h \
+            src/dialogs/LineDialog.h \
+            src/plot/tools/ScalePicker.h \
+            src/plot/tools/TitlePicker.h \
+            src/plot/tools/CanvasPicker.h \
+            src/plot/PlotCurve.h \
+            src/plot/QwtErrorPlotCurve.h \
+            src/plot/QwtPieCurve.h \
+            src/dialogs/ErrDialog.h \
+            src/plot/Legend.h \
+            src/plot/ArrowMarker.h \
+            src/plot/ImageMarker.h \
+            src/dialogs/ImageDialog.h \
+            src/analysis/fit/fit_gsl.h \
+            src/plot/MultiLayer.h\
+            src/dialogs/LayerDialog.h \
+            src/dialogs/IntDialog.h \
+            src/plot/3d/Bar.h \
+            src/plot/3d/Cone3D.h \
+            src/dialogs/ConfigDialog.h \
+            src/plot/QwtBarCurve.h \
+            src/plot/BoxCurve.h \
+            src/plot/QwtHistogram.h \
+            src/plot/VectorCurve.h \
+            src/plot/ScaleDraw.h \
+            src/project/Matrix.h \
+            src/dialogs/DataSetDialog.h \
+            src/scripting/MyParser.h \
+            src/widgets/SymbolBox.h \
+            src/widgets/PatternBox.h \
+            src/dialogs/SymbolDialog.h \
+            src/plot/Plot.h \
+            src/widgets/ColorButton.h \
+            src/dialogs/AssociationsDialog.h \
+            src/dialogs/RenameWindowDialog.h \
+            src/project/MyWidget.h \
+            src/dialogs/InterpolationDialog.h\
+            src/dialogs/ImportASCIIDialog.h \
+            src/dialogs/ImageExportDialog.h\
+            src/dialogs/SmoothCurveDialog.h\
+            src/dialogs/FilterDialog.h\
+            src/dialogs/FFTDialog.h\
+            src/project/Note.h\
+            src/project/Folder.h\
+            src/dialogs/FindDialog.h\
+            src/scripting/ScriptingEnv.h\
+            src/scripting/Script.h\
+            src/scripting/ScriptEdit.h\
+            src/plot/FunctionCurve.h\
+            src/analysis/fit/Fit.h\
+            src/analysis/fit/MultiPeakFit.h\
+            src/analysis/fit/ExponentialFit.h\
+            src/analysis/fit/PolynomialFit.h\
+            src/analysis/fit/NonLinearFit.h\
+            src/analysis/fit/PluginFit.h\
+            src/analysis/fit/SigmoidalFit.h\
+            src/app/customevents.h\
+            src/dialogs/ScriptingLangDialog.h\
+            src/widgets/TextFormatButtons.h\
+            src/project/TableStatistics.h\
+            src/plot/Spectrogram.h\
+            src/widgets/ColorMapEditor.h\
+            src/plot/SelectionMoveResizer.h\
+            src/analysis/Filter.h\
+            src/analysis/Differentiation.h\
+            src/analysis/Integration.h\
+            src/analysis/Interpolation.h\
+            src/analysis/SmoothFilter.h\
+            src/analysis/FFTFilter.h\
+            src/analysis/FFT.h\
+            src/analysis/Convolution.h\
+            src/analysis/Correlation.h\
+            src/plot/tools/PlotToolInterface.h\
+            src/plot/tools/ScreenPickerTool.h\
+            src/plot/tools/DataPickerTool.h\
+            src/plot/tools/RangeSelectorTool.h\
+            src/plot/tools/TranslateCurveTool.h\
+            src/plot/tools/MultiPeakFitTool.h\
+            src/dialogs/CurveRangeDialog.h\
+            src/plot/tools/LineProfileTool.h\
+            src/plot/PlotEnrichement.h\
+            src/dialogs/ExtensibleFileDialog.h\
+            src/dialogs/OpenProjectDialog.h\
+        src/plot/Grid.h\
+            src/plot/tools/DataPointPicker.h \
+            src/io/TeXTableSettings.h \
+            src/widgets/TeXTableSettingsWidget.h \
+            src/dialogs/TeXTableExportDialog.h \
+            src/widgets/PenWidget.h \
+            src/app/QStringStdString.h
 
 ###################### SOURCES ##############################################
 
-SOURCES  += src/ApplicationWindow.cpp \
-            src/IconLoader.cpp \
-            src/Graph.cpp \
-            src/Graph3D.cpp \
-            src/Table.cpp \
-            src/CurvesDialog.cpp \
-            src/PlotDialog.cpp \
-            src/Plot3DDialog.cpp \
-            src/PlotWizard.cpp \
-            src/ExportDialog.cpp \
-            src/AxesDialog.cpp \
-            src/PolynomFitDialog.cpp \
-            src/TextDialog.cpp \
-            src/ScalePicker.cpp\
-            src/TitlePicker.cpp \
-            src/CanvasPicker.cpp \
-            src/ExpDecayDialog.cpp \
-            src/FunctionDialog.cpp \
-            src/FitDialog.cpp \
-            src/SurfaceDialog.cpp \
-            src/LineDialog.cpp \
-            src/PlotCurve.cpp \
-            src/QwtErrorPlotCurve.cpp \
-            src/QwtPieCurve.cpp \
-            src/ErrDialog.cpp \
-            src/Legend.cpp \
-            src/ArrowMarker.cpp \
-            src/ImageMarker.cpp \
-            src/ImageDialog.cpp \
-            src/MultiLayer.cpp\
-            src/LayerDialog.cpp \
-            src/IntDialog.cpp \
-            src/Bar.cpp \
-            src/Cone3D.cpp \
-            src/DataSetDialog.cpp \
-            src/ConfigDialog.cpp \
-            src/QwtBarCurve.cpp \
-            src/BoxCurve.cpp \
-            src/QwtHistogram.cpp \
-            src/VectorCurve.cpp \
-            src/Matrix.cpp \
-            src/MyParser.cpp\
-            src/SymbolBox.cpp \
-            src/PatternBox.cpp \
-            src/SymbolDialog.cpp \
-            src/Plot.cpp \
-            src/ColorButton.cpp \
-            src/AssociationsDialog.cpp \
-            src/RenameWindowDialog.cpp \
-            src/MyWidget.cpp\
-            src/InterpolationDialog.cpp\
-            src/fit_gsl.cpp\
-            src/SmoothCurveDialog.cpp\
-            src/FilterDialog.cpp\
-            src/FFTDialog.cpp\
-            src/Note.cpp\
-            src/Folder.cpp\
-            src/FindDialog.cpp\
-            src/TextFormatButtons.cpp\
-            src/ScriptEdit.cpp\
-            src/ImportASCIIDialog.cpp\
-            src/ImageExportDialog.cpp\
-            src/ScaleDraw.cpp\
-            src/FunctionCurve.cpp\
-            src/Fit.cpp\
-            src/MultiPeakFit.cpp\
-            src/ExponentialFit.cpp\
-            src/PolynomialFit.cpp\
-            src/PluginFit.cpp\
-            src/NonLinearFit.cpp\
-            src/SigmoidalFit.cpp\
-            src/ScriptingEnv.cpp\
-            src/Script.cpp\
-            src/ScriptingLangDialog.cpp\
-            src/TableStatistics.cpp\
-            src/Spectrogram.cpp\
-            src/ColorMapEditor.cpp\
-            src/SelectionMoveResizer.cpp\
-            src/Filter.cpp\
-            src/Differentiation.cpp\
-            src/Integration.cpp\
-            src/Interpolation.cpp\
-            src/SmoothFilter.cpp\
-            src/FFTFilter.cpp\
-            src/FFT.cpp\
-            src/Convolution.cpp\
-            src/Correlation.cpp\
-            src/ScreenPickerTool.cpp\
-            src/DataPickerTool.cpp\
-            src/RangeSelectorTool.cpp\
-            src/TranslateCurveTool.cpp\
-            src/MultiPeakFitTool.cpp\
-            src/CurveRangeDialog.cpp\
-            src/LineProfileTool.cpp\
-            src/PlotEnrichement.cpp\
-            src/ExtensibleFileDialog.cpp\
-            src/OpenProjectDialog.cpp\
-            src/Grid.cpp\
-            src/globals.cpp \
-            src/DataPointPicker.cpp \
-            src/TeXTableSettings.cpp \
-            src/TeXTableSettingsWidget.cpp \
-            src/TeXTableExportDialog.cpp \
-            src/version.cpp \
-            src/PenWidget.cpp
+SOURCES  += src/app/ApplicationWindow.cpp \
+            src/app/IconLoader.cpp \
+            src/plot/Graph.cpp \
+            src/plot/3d/Graph3D.cpp \
+            src/project/Table.cpp \
+            src/dialogs/CurvesDialog.cpp \
+            src/dialogs/PlotDialog.cpp \
+            src/dialogs/Plot3DDialog.cpp \
+            src/dialogs/PlotWizard.cpp \
+            src/dialogs/ExportDialog.cpp \
+            src/dialogs/AxesDialog.cpp \
+            src/dialogs/PolynomFitDialog.cpp \
+            src/dialogs/TextDialog.cpp \
+            src/plot/tools/ScalePicker.cpp\
+            src/plot/tools/TitlePicker.cpp \
+            src/plot/tools/CanvasPicker.cpp \
+            src/dialogs/ExpDecayDialog.cpp \
+            src/dialogs/FunctionDialog.cpp \
+            src/dialogs/FitDialog.cpp \
+            src/dialogs/SurfaceDialog.cpp \
+            src/dialogs/LineDialog.cpp \
+            src/plot/PlotCurve.cpp \
+            src/plot/QwtErrorPlotCurve.cpp \
+            src/plot/QwtPieCurve.cpp \
+            src/dialogs/ErrDialog.cpp \
+            src/plot/Legend.cpp \
+            src/plot/ArrowMarker.cpp \
+            src/plot/ImageMarker.cpp \
+            src/dialogs/ImageDialog.cpp \
+            src/plot/MultiLayer.cpp\
+            src/dialogs/LayerDialog.cpp \
+            src/dialogs/IntDialog.cpp \
+            src/plot/3d/Bar.cpp \
+            src/plot/3d/Cone3D.cpp \
+            src/dialogs/DataSetDialog.cpp \
+            src/dialogs/ConfigDialog.cpp \
+            src/plot/QwtBarCurve.cpp \
+            src/plot/BoxCurve.cpp \
+            src/plot/QwtHistogram.cpp \
+            src/plot/VectorCurve.cpp \
+            src/project/Matrix.cpp \
+            src/scripting/MyParser.cpp\
+            src/widgets/SymbolBox.cpp \
+            src/widgets/PatternBox.cpp \
+            src/dialogs/SymbolDialog.cpp \
+            src/plot/Plot.cpp \
+            src/widgets/ColorButton.cpp \
+            src/dialogs/AssociationsDialog.cpp \
+            src/dialogs/RenameWindowDialog.cpp \
+            src/project/MyWidget.cpp\
+            src/dialogs/InterpolationDialog.cpp\
+            src/analysis/fit/fit_gsl.cpp\
+            src/dialogs/SmoothCurveDialog.cpp\
+            src/dialogs/FilterDialog.cpp\
+            src/dialogs/FFTDialog.cpp\
+            src/project/Note.cpp\
+            src/project/Folder.cpp\
+            src/dialogs/FindDialog.cpp\
+            src/widgets/TextFormatButtons.cpp\
+            src/scripting/ScriptEdit.cpp\
+            src/dialogs/ImportASCIIDialog.cpp\
+            src/dialogs/ImageExportDialog.cpp\
+            src/plot/ScaleDraw.cpp\
+            src/plot/FunctionCurve.cpp\
+            src/analysis/fit/Fit.cpp\
+            src/analysis/fit/MultiPeakFit.cpp\
+            src/analysis/fit/ExponentialFit.cpp\
+            src/analysis/fit/PolynomialFit.cpp\
+            src/analysis/fit/PluginFit.cpp\
+            src/analysis/fit/NonLinearFit.cpp\
+            src/analysis/fit/SigmoidalFit.cpp\
+            src/scripting/ScriptingEnv.cpp\
+            src/scripting/Script.cpp\
+            src/dialogs/ScriptingLangDialog.cpp\
+            src/project/TableStatistics.cpp\
+            src/plot/Spectrogram.cpp\
+            src/widgets/ColorMapEditor.cpp\
+            src/plot/SelectionMoveResizer.cpp\
+            src/analysis/Filter.cpp\
+            src/analysis/Differentiation.cpp\
+            src/analysis/Integration.cpp\
+            src/analysis/Interpolation.cpp\
+            src/analysis/SmoothFilter.cpp\
+            src/analysis/FFTFilter.cpp\
+            src/analysis/FFT.cpp\
+            src/analysis/Convolution.cpp\
+            src/analysis/Correlation.cpp\
+            src/plot/tools/ScreenPickerTool.cpp\
+            src/plot/tools/DataPickerTool.cpp\
+            src/plot/tools/RangeSelectorTool.cpp\
+            src/plot/tools/TranslateCurveTool.cpp\
+            src/plot/tools/MultiPeakFitTool.cpp\
+            src/dialogs/CurveRangeDialog.cpp\
+            src/plot/tools/LineProfileTool.cpp\
+            src/plot/PlotEnrichement.cpp\
+            src/dialogs/ExtensibleFileDialog.cpp\
+            src/dialogs/OpenProjectDialog.cpp\
+            src/plot/Grid.cpp\
+            src/app/globals.cpp \
+            src/plot/tools/DataPointPicker.cpp \
+            src/io/TeXTableSettings.cpp \
+            src/widgets/TeXTableSettingsWidget.cpp \
+            src/dialogs/TeXTableExportDialog.cpp \
+            src/app/version.cpp \
+            src/widgets/PenWidget.cpp
 
 ###################### FORMS ##############################################
-FORMS +=   src/SciDAVisAbout.ui
+FORMS +=   src/app/SciDAVisAbout.ui
 
 ########### Future code backported from the aspect framework ##################
 DEFINES += LEGACY_CODE_0_2_x
 INCLUDEPATH  += src
+INCLUDEPATH  += src/app
+INCLUDEPATH  += src/project
+INCLUDEPATH  += src/io
+INCLUDEPATH  += src/analysis
+INCLUDEPATH  += src/analysis/fit
+INCLUDEPATH  += src/plot
+INCLUDEPATH  += src/plot/3d
+INCLUDEPATH  += src/plot/tools
+INCLUDEPATH  += src/scripting
+INCLUDEPATH  += src/dialogs
+INCLUDEPATH  += src/widgets
 INCLUDEPATH  += src/future
 
 FORMS += src/future/matrix/matrixcontroltabs.ui \
@@ -329,6 +340,6 @@ SOURCES += ../3rdparty/minigzip/minigzip.c
 #### Origin OPJ import via liborigin
 ###############################################################
 liborigin {
-	HEADERS += src/importOPJ.h
-	SOURCES += src/importOPJ.cpp
+	HEADERS += src/io/importOPJ.h
+	SOURCES += src/io/importOPJ.cpp
 }

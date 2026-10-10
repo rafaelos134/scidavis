@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 #
 # git pre-commit hook for running clang-format at commit time
-# To use, link this file to .git/hooks/pre-commit
+# To use: ln -s ../../scripts/pre-commit.py .git/hooks/pre-commit
 
 import os
 import re

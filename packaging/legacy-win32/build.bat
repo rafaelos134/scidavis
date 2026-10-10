@@ -1,3 +1,5 @@
+rem run from the repository root
+cd /d "%~dp0..\.."
 rem ============================ BUILD MUPARSER ===============================
 cd 3rdparty\muparser\build
 mingw32-make -fmakefile.mingw
@@ -70,3 +72,4 @@ copy .\scidavis\scidavisrc.py .\output
 copy .\scidavis\scidavisUtil.py .\output
 copy C:\Python27\Lib\site-packages\sip.pyd .\output
 copy C:\Python27\DLLs\python27.dll .\output
+copy .\packaging\legacy-win32\scidavisScriptInstall.nsi .\output

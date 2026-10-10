@@ -49,7 +49,7 @@ MacPorts stuff
 
 This should create a clickable application directory scidavis/scidavis.app
 
-4. Run the script mkMacDist.sh. This copies all the dependent
+4. Run the script packaging/mkMacDist.sh. This copies all the dependent
 dynamic libraries from the MacPorts install location (/opt/local) into
 the scidavis.app directory, and rewrites the load paths in the dynamic
 load modules. This is currently horribly fragile, as updates to the

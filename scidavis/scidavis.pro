@@ -44,6 +44,7 @@ liborigin {
 ########### Future code backported from the aspect framework ##################
 DEFINES += LEGACY_CODE_0_2_x
 INCLUDEPATH += ../libscidavis/src/future
+INCLUDEPATH += ../libscidavis/src/app ../libscidavis/src/project ../libscidavis/src/io ../libscidavis/src/analysis ../libscidavis/src/analysis/fit ../libscidavis/src/plot ../libscidavis/src/plot/3d ../libscidavis/src/plot/tools ../libscidavis/src/scripting ../libscidavis/src/dialogs ../libscidavis/src/widgets
 
 ###################### DESKTOP INTEGRATION ##################################
 

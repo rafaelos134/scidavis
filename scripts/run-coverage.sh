@@ -3,6 +3,7 @@
 #make qmake
 #make clean
 #make -j4
+cd "$(dirname "$0")/.." || exit 1   # run from the repository root
 for i in test/00/*; do
     sh $i
 done

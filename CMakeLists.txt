@@ -145,6 +145,7 @@ endif()
 set( DOC_FILES
   ChangeLog.md
   README.md
+  CREDITS.md
   gpl.txt
   license.rtf
   )

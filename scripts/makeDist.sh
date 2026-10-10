@@ -1,3 +1,4 @@
+cd "$(dirname "$0")/.." || exit 1   # run from the repository root
 fullversion=`git describe`
 version=${fullversion%%-*}
 extra=${fullversion##*-}

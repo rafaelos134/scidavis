@@ -12,8 +12,8 @@
   SIP_DIR = ../tmp/scidavis
 
   DEFINES += SCRIPTING_PYTHON
-  HEADERS += src/PythonScript.h src/PythonScripting.h
-  SOURCES += src/PythonScript.cpp src/PythonScripting.cpp
+  HEADERS += src/scripting/PythonScript.h src/scripting/PythonScripting.h
+  SOURCES += src/scripting/PythonScript.cpp src/scripting/PythonScripting.cpp
 
   message("Making PyQt bindings via SIP")
   PYTHONBIN = $$(PYTHON)
@@ -28,20 +28,20 @@
     } 
     SIP_FAILURE = TRUE
     system(mkdir -p $${SIP_DIR})
-    system($$system($$PYTHONBIN python-sipcmd.py PyQt$$QT_MAJOR_VERSION) $$system($$PYTHONBIN-config --includes) -c $${SIP_DIR}  src/scidavis.sip): SIP_FAILURE = FALSE
+    system($$system($$PYTHONBIN python-sipcmd.py PyQt$$QT_MAJOR_VERSION) $$system($$PYTHONBIN-config --includes) -c $${SIP_DIR}  src/scripting/scidavis.sip): SIP_FAILURE = FALSE
     equals(SIP_FAILURE, "TRUE") {
-        error(`$$PYTHONBIN python-sipcmd.py PyQt$$QT_MAJOR_VERSION` `$$PYTHONBIN-config --includes` -c $${SIP_DIR}  src/scidavis.sip FAILED in $$PWD)
+        error(`$$PYTHONBIN python-sipcmd.py PyQt$$QT_MAJOR_VERSION` `$$PYTHONBIN-config --includes` -c $${SIP_DIR}  src/scripting/scidavis.sip FAILED in $$PWD)
     }
   }
 
   win32 {
   mxe {
      DEFINES += SIP_STATIC_MODULE
-    system($$system($$PYTHONBIN python-sipcmd.py PyQt$$QT_MAJOR_VERSION) -c $${SIP_DIR} src/scidavis.sip)
+    system($$system($$PYTHONBIN python-sipcmd.py PyQt$$QT_MAJOR_VERSION) -c $${SIP_DIR} src/scripting/scidavis.sip)
   } else {
     INCLUDEPATH += $$system(call ../python-includepath.py)
     # TODO: fix the command below (only really necessary if SIP_DIR != MOC/OBJECTS_DIR)
-    system($$system(call python-sipcmd.py) -c $${SIP_DIR} src/scidavis.sip)
+    system($$system(call python-sipcmd.py) -c $${SIP_DIR} src/scripting/scidavis.sip)
   }
 }
 

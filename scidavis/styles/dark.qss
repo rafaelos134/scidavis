@@ -1,0 +1,50 @@
+/* SciDAVis dark theme.
+ * Loaded by ApplicationWindow::applyThemePalette() on top of the Fusion style
+ * and the dark QPalette, so only details the palette can't express go here. */
+
+QToolTip {
+    color: #e6e6e6;
+    background-color: #2b2b2b;
+    border: 1px solid #555555;
+    padding: 3px;
+}
+
+QMenu::separator,
+QToolBar::separator {
+    background: #4a4a4a;
+}
+
+QMenu::separator {
+    height: 1px;
+    margin: 4px 8px;
+}
+
+QToolBar::separator {
+    width: 1px;
+    margin: 4px 3px;
+}
+
+QDockWidget::title {
+    background: #353535;
+    padding: 4px;
+}
+
+QHeaderView::section {
+    background-color: #353535;
+    color: #e6e6e6;
+    border: 0;
+    border-right: 1px solid #4a4a4a;
+    border-bottom: 1px solid #4a4a4a;
+    padding: 3px;
+}
+
+QTableView {
+    gridline-color: #4a4a4a;
+}
+
+/* The table/matrix "Type" tabs hard-code a light gray background in their
+ * .ui files (future/table/controltabs.ui, future/matrix/matrixcontroltabs.ui). */
+QTextEdit#type_info {
+    background-color: #2b2b2b;
+    color: #e6e6e6;
+}

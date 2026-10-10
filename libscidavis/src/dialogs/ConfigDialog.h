@@ -164,6 +164,8 @@ private:
     QListWidget *itemsList;
     QLabel *labelFrameWidth, *lblLanguage, *lblWorkspace, *lblPanels, *lblPageHeader;
     QLabel *lblPanelsText, *lblFonts, *lblStyle, *lblDecimalSeparator, *lblAppPrecision;
+    QLabel *lblTheme;
+    QComboBox *boxTheme;
     QGroupBox *groupBoxConfirm;
     QGroupBox *groupBoxTableFonts, *groupBoxTableCol;
     QLabel *lblSeparator, *lblTableBackground, *lblTextColor, *lblHeaderColor;

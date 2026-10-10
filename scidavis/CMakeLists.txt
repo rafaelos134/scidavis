@@ -1,6 +1,7 @@
 set( RESOURCES
   "appicons.qrc"
   "icons.qrc"
+  "styles.qrc"
   )
 
 if( WIN32 )
@@ -31,7 +32,12 @@ add_executable( scidavis
   )
 
 # SciDAVis expects qm files to be in the translations directory. qt5_create_translation puts them somewhere else
-add_custom_command(TARGET scidavis COMMAND mkdir -p translations || cp ${QM_FILES} translations)
+# (a custom target, so updated .qm files are copied even when scidavis itself is not relinked)
+add_custom_target( scidavis_translations ALL
+  COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:scidavis>/translations"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${QM_FILES} "$<TARGET_FILE_DIR:scidavis>/translations"
+  DEPENDS ${QM_FILES}
+  )
 
 if( WIN32 )
   target_compile_definitions( scidavis PUBLIC
@@ -41,7 +47,7 @@ if( WIN32 )
     )
 else()
   target_compile_definitions( scidavis PUBLIC
-     TS_PATH="${CMAKE_INSTALL_DATAROOTDIR}/scidavis/translations"
+     TS_PATH="${CMAKE_INSTALL_FULL_DATAROOTDIR}/scidavis/translations"
      DOC_PATH="${CMAKE_INSTALL_DOCDIR}/scidavis"
      PLUGIN_PATH="${CMAKE_INSTALL_LIBDIR}/scidavis/plugins"
     )

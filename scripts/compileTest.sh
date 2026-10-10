@@ -1,6 +1,7 @@
 # test that the code builds with different compile options The default
 # (aeb) build tests the default configuration (CONFIG=release, no
 # extras like Origin
+cd "$(dirname "$0")/.." || exit 1   # run from the repository root
 find . -name Makefile -exec rm {} \;
 qmake DEFINES=ORIGIN_IMPORT CONFIG=debug
 make clean

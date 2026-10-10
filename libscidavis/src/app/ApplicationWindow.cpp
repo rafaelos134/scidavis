@@ -138,6 +138,9 @@
 #include <QShortcut>
 #include <QDockWidget>
 #include <QTextStream>
+#include <QFile>
+#include <QStyle>
+#include <QStyleFactory>
 #include <QVarLengthArray>
 #include <QList>
 #include <QUrl>
@@ -218,7 +221,10 @@ ApplicationWindow::ApplicationWindow()
 
     // Icons
     IconLoader::init();
-    IconLoader::lumen_ = IconLoader::isLight(palette().color(QPalette::Window));
+    // The theme must be applied before any action is created, because the
+    // icon set (light or dark) is chosen from the window background color.
+    appTheme = getSettings().value("/General/Theme", "default").toString();
+    applyThemePalette();
 
     initFonts();
     QPixmapCache::setCacheLimit(20 * QPixmapCache::cacheLimit());
@@ -392,21 +398,7 @@ void ApplicationWindow::applyUserSettings()
     updateAppFonts();
     setScriptingLang(defaultScriptingLang);
 
-    d_workspace.setBackground(workspaceColor);
-
-    QPalette cg;
-    cg.setColor(QPalette::Base, QColor(panelsColor));
-    qApp->setPalette(cg);
-
-    cg.setColor(QPalette::Text, QColor(panelsTextColor));
-    cg.setColor(QPalette::WindowText, QColor(panelsTextColor));
-    cg.setColor(QPalette::HighlightedText, QColor(panelsTextColor));
-    lv.setPalette(cg);
-    results->setPalette(cg);
-
-    cg.setColor(QPalette::Text, QColor(Qt::green));
-    cg.setColor(QPalette::HighlightedText, QColor(Qt::darkGreen));
-    cg.setColor(QPalette::Base, QColor(Qt::black));
+    applyWorkspaceColors();
 }
 
 void ApplicationWindow::initToolBars()
@@ -2987,6 +2979,12 @@ void ApplicationWindow::changeAppStyle(const QString &s)
     if (appStyle.toLower() == s.toLower())
         return;
 
+    // the dark theme always uses Fusion; remember the choice for the default theme
+    if (appTheme == "dark") {
+        appStyle = s;
+        return;
+    }
+
     qApp->setStyle(s);
     appStyle = qApp->style()->objectName();
 
@@ -4416,6 +4414,7 @@ void ApplicationWindow::saveSettings()
     settings.setValue("/ShowWindowsPolicy", show_windows_policy);
     settings.setValue("/RecentProjects", recentProjects);
     settings.setValue("/Style", appStyle);
+    settings.setValue("/Theme", appTheme);
     settings.setValue("/AutoSave", autoSave);
     settings.setValue("/AutoSaveTime", autoSaveTime);
     settings.setValue("/UndoLimit", undoLimit);
@@ -10214,16 +10213,86 @@ void ApplicationWindow::connectTable(Table *w)
 
 void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc, const QColor &tpc)
 {
-    if (workspaceColor != wc) {
-        workspaceColor = wc;
-        d_workspace.setBackground(wc);
-    }
-
-    if (panelsColor == pc && panelsTextColor == tpc)
+    if (workspaceColor == wc && panelsColor == pc && panelsTextColor == tpc)
         return;
 
+    workspaceColor = wc;
     panelsColor = pc;
     panelsTextColor = tpc;
+
+    applyWorkspaceColors();
+}
+
+void ApplicationWindow::changeAppTheme(const QString &theme)
+{
+    if (appTheme == theme)
+        return;
+
+    appTheme = theme;
+    applyThemePalette();
+    applyWorkspaceColors();
+}
+
+void ApplicationWindow::applyThemePalette()
+{
+    if (appTheme == "dark") {
+        qApp->setStyle(QStyleFactory::create("Fusion"));
+
+        const QColor window(53, 53, 53), base(35, 35, 35), text(230, 230, 230);
+        const QColor disabledText(127, 127, 127), highlight(42, 130, 218);
+        QPalette pal;
+        pal.setColor(QPalette::Window, window);
+        pal.setColor(QPalette::WindowText, text);
+        pal.setColor(QPalette::Base, base);
+        pal.setColor(QPalette::AlternateBase, window);
+        pal.setColor(QPalette::ToolTipBase, base);
+        pal.setColor(QPalette::ToolTipText, text);
+        pal.setColor(QPalette::Text, text);
+        pal.setColor(QPalette::Button, window);
+        pal.setColor(QPalette::ButtonText, text);
+        pal.setColor(QPalette::BrightText, Qt::red);
+        pal.setColor(QPalette::Link, highlight);
+        pal.setColor(QPalette::Highlight, highlight);
+        pal.setColor(QPalette::HighlightedText, Qt::white);
+        pal.setColor(QPalette::Light, QColor(80, 80, 80));
+        pal.setColor(QPalette::Midlight, QColor(66, 66, 66));
+        pal.setColor(QPalette::Mid, QColor(45, 45, 45));
+        pal.setColor(QPalette::Dark, QColor(30, 30, 30));
+        pal.setColor(QPalette::Shadow, QColor(20, 20, 20));
+        pal.setColor(QPalette::PlaceholderText, disabledText);
+        pal.setColor(QPalette::Disabled, QPalette::WindowText, disabledText);
+        pal.setColor(QPalette::Disabled, QPalette::Text, disabledText);
+        pal.setColor(QPalette::Disabled, QPalette::ButtonText, disabledText);
+        pal.setColor(QPalette::Disabled, QPalette::HighlightedText, disabledText);
+        pal.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
+        qApp->setPalette(pal);
+
+        QFile qss(":/styles/dark.qss");
+        if (qss.open(QIODevice::ReadOnly | QIODevice::Text))
+            qApp->setStyleSheet(QString::fromUtf8(qss.readAll()));
+    } else {
+        qApp->setStyleSheet(QString());
+        qApp->setStyle(appStyle);
+        QPalette pal = qApp->style()->standardPalette();
+        if (panelsColor.isValid())
+            pal.setColor(QPalette::Active, QPalette::Base, panelsColor);
+        qApp->setPalette(pal);
+    }
+
+    IconLoader::lumen_ = IconLoader::isLight(qApp->palette().color(QPalette::Window));
+}
+
+void ApplicationWindow::applyWorkspaceColors()
+{
+    if (appTheme == "dark") {
+        // the user colors are meant for the light look, the dark palette replaces them
+        d_workspace.setBackground(QColor(30, 30, 30));
+        lv.setPalette(qApp->palette());
+        results->setPalette(qApp->palette());
+        return;
+    }
+
+    d_workspace.setBackground(workspaceColor);
 
     QPalette cg;
     cg.setColor(QPalette::Base, QColor(panelsColor));
