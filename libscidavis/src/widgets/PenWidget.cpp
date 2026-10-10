@@ -152,9 +152,7 @@ void PenWidget::createConnections()
 {
     connect(colorButton, SIGNAL(changed(QColor)), this, SLOT(updateColor(QColor)));
     connect(widthComboBox, SIGNAL(editTextChanged(QString)), this, SLOT(updateWidth(QString)));
-#if QT_VERSION >= 0x050000
     connect(widthComboBox, SIGNAL(currentTextChanged(QString)), this, SLOT(updateWidth(QString)));
-#endif
     connect(lineStyleComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateLineStyle(int)));
     connect(capStyleComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateCapStyle(int)));
     connect(joinStyleComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateJoinStyle(int)));
@@ -370,15 +368,9 @@ void PenWidget::updateCustomDash()
 
 QVector<qreal> PenWidget::dashPattern()
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QStringList custDash = d_custom_dash.split(' ', Qt::SkipEmptyParts);
     QVector<qreal> custDashF;
     for (auto s : d_custom_dash.split(' ', Qt::SkipEmptyParts))
-#else
-    QStringList custDash = d_custom_dash.split(' ', QString::SkipEmptyParts);
-    QVector<qreal> custDashF;
-    for (auto s : d_custom_dash.split(' ', QString::SkipEmptyParts))
-#endif
         custDashF << s.toDouble();
     return custDashF;
 }

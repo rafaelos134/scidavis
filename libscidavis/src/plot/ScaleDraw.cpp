@@ -301,11 +301,7 @@ QwtText QwtSupersciptsScaleDraw::label(double value) const
     labelFormat(f, prec);
 
     QString txt = QLocale().toString(transformValue(value), 'e', prec);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QStringList list = txt.split("e", Qt::SkipEmptyParts);
-#else
-    QStringList list = txt.split("e", QString::SkipEmptyParts);
-#endif
     if (list[0].toDouble() == 0.0)
         return QString("0");
 

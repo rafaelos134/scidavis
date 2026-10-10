@@ -35,10 +35,8 @@ ExtensibleFileDialog::ExtensibleFileDialog(QWidget *parent, bool extended, Qt::W
 {
     d_extension = 0;
 
-#if QT_VERSION >= 0x050000
     // needed to extend the Qt5 QFileDialog
     setOption(QFileDialog::DontUseNativeDialog, true);
-#endif
 
     d_extension_toggle = new QPushButton(tr("<< &Advanced"));
     d_extension_toggle->setCheckable(true);

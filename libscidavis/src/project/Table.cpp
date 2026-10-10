@@ -1171,11 +1171,7 @@ void Table::restore(const QStringList &list_in)
     temp_list.removeFirst();
     importV0x0001XXHeader(temp_list);
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     setColWidths((*iterator).right((*iterator).length() - 9).split("\t", Qt::SkipEmptyParts));
-#else
-    setColWidths((*iterator).right((*iterator).length() - 9).split("\t", QString::SkipEmptyParts));
-#endif
     iterator++;
 
     temp_list = (*iterator++).split("\t");

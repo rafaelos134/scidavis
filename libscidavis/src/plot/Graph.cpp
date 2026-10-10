@@ -73,9 +73,7 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 
-#if QT_VERSION >= 0x040300
 #include <QSvgGenerator>
-#endif
 
 #include <qwt_painter.h>
 #include <qwt_plot_canvas.h>
@@ -806,11 +804,7 @@ void Graph::setLabelsColHeaderFormat(int axis, Table *table)
 
 void Graph::setLabelsDateTimeFormat(int axis, AxisType type, const QString &formatInfo)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QStringList list = formatInfo.split(";", Qt::KeepEmptyParts);
-#else
-    QStringList list = formatInfo.split(";", QString::KeepEmptyParts);
-#endif
     if ((int)list.count() < 2 || list[1].isEmpty()) {
         QMessageBox::critical(this, tr("Error"),
                               tr("Couldn't change the axis type to the requested format!"));
@@ -1383,14 +1377,10 @@ void Graph::exportVector(const QString &fileName, int, bool color, bool keepAspe
 
     printer.setOutputFileName(fileName);
     if (fileName.contains(".eps")) {
-#if QT_VERSION >= 0x050000
         QMessageBox::warning(this, tr("Warning"),
                              tr("Output in postscript format is not available for Qt5, using PDF"));
         printer.setOutputFormat(QPrinter::PdfFormat);
         printer.setOutputFileName(fileName + ".pdf");
-#else
-        printer.setOutputFormat(QPrinter::PostScriptFormat);
-#endif
     }
 
     if (color)
@@ -1462,17 +1452,13 @@ void Graph::print()
 
 void Graph::exportSVG(const QString &fname)
 {
-#if QT_VERSION >= 0x040300
     QSvgGenerator svg;
     svg.setFileName(fname);
-#if QT_VERSION >= 0x040500
     svg.setSize(d_plot->size());
     svg.setViewBox(d_plot->rect());
     svg.setResolution(96); // FIXME hardcored
     svg.setTitle(this->objectName());
-#endif
     exportPainter(svg);
-#endif
 }
 
 void Graph::exportPainter(QPaintDevice &paintDevice, bool keepAspect, QRect rect)
@@ -2322,11 +2308,7 @@ QString Graph::saveCurveLayout(int index)
         s += QString::number(v->headAngle()) + "\t";
         s += QString::number(v->filledArrowHead()) + "\t";
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QStringList colsList = v->plotAssociation().split(",", Qt::SkipEmptyParts);
-#else
-        QStringList colsList = v->plotAssociation().split(",", QString::SkipEmptyParts);
-#endif
         s += colsList[2].remove("(X)").remove("(A)") + "\t";
         s += colsList[3].remove("(Y)").remove("(M)");
         if (style == VectXYAM)
@@ -2693,11 +2675,7 @@ QString Graph::saveMarkers()
         s += QString::number(mrk->angle()) + "\t";
         s += COLORNAME(mrk->backgroundColor()) + "\t";
         s += QString::number(mrk->backgroundColor().alpha()) + "\t";
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QStringList textList = mrk->text().split("\n", Qt::KeepEmptyParts);
-#else
-        QStringList textList = mrk->text().split("\n", QString::KeepEmptyParts);
-#endif
         s += textList.join("\t");
         if (d_texts[i] != legendMarkerID)
             s += "</text>\n";
@@ -2947,11 +2925,7 @@ void Graph::updateCurveLayout(int index, const CurveLayout *cL)
     pen.setCapStyle(static_cast<Qt::PenCapStyle>(cL->lCapStyle));
     pen.setJoinStyle(static_cast<Qt::PenJoinStyle>(cL->lJoinStyle));
     QVector<qreal> customDash;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     for (auto v : (cL->lCustomDash).split(" ", Qt::SkipEmptyParts))
-#else
-    for (auto v : (cL->lCustomDash).split(" ", QString::SkipEmptyParts))
-#endif
         customDash << v.toDouble();
     if (pen.style() == Qt::CustomDashLine)
         pen.setDashPattern(customDash);
@@ -3560,11 +3534,7 @@ void Graph::removeLegendItem(int index)
     }
 
     QString text = mrk->text();
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QStringList items = text.split("\n", Qt::SkipEmptyParts);
-#else
-    QStringList items = text.split("\n", QString::SkipEmptyParts);
-#endif
 
     if (index >= (int)items.count())
         return;
@@ -5161,11 +5131,7 @@ void Graph::updateCurveNames(const QString &oldName, const QString &newName, boo
     if (legendMarkerID >= 0) { // update legend
         Legend *mrk = (Legend *)d_plot->marker(legendMarkerID);
         if (mrk) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
             QStringList lst = mrk->text().split("\n", Qt::SkipEmptyParts);
-#else
-            QStringList lst = mrk->text().split("\n", QString::SkipEmptyParts);
-#endif
             lst.replaceInStrings(oldName, newName);
             mrk->setText(lst.join("\n"));
             d_plot->replot();

@@ -32,11 +32,7 @@ ostream &operator<<(ostream &o, const QImage &x)
 {
     o << "\"";
     auto data = x.bits();
-#if QT_VERSION >= 0x050A00
     auto size = x.sizeInBytes();
-#else
-    auto size = x.byteCount();
-#endif
     for (int i = 0; i < size; i++)
         o << std::hex << int(data[i]);
     return o << "\"";

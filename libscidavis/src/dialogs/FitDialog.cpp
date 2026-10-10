@@ -113,19 +113,11 @@ void FitDialog::initFitPage()
 
     boxParams = new QTableWidget();
     boxParams->setColumnCount(3);
-#if QT_VERSION >= 0x050000
     boxParams->horizontalHeader()->setSectionsClickable(false);
     boxParams->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     boxParams->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
     boxParams->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
     boxParams->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-#else
-    boxParams->horizontalHeader()->setClickable(false);
-    boxParams->horizontalHeader()->setResizeMode(0, QHeaderView::ResizeToContents);
-    boxParams->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
-    boxParams->horizontalHeader()->setResizeMode(2, QHeaderView::ResizeToContents);
-    boxParams->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-#endif
     QStringList header = QStringList() << tr("Parameter") << tr("Value") << tr("Constant");
     boxParams->setHorizontalHeaderLabels(header);
     boxParams->verticalHeader()->hide();
@@ -629,11 +621,7 @@ void FitDialog::showFitPage()
     int param_table_rows = boxParams->rowCount();
 
     QString par = boxParam->text().simplified();
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QStringList paramList = par.split(QRegularExpression("[,;]+[\\s]*"), Qt::SkipEmptyParts);
-#else
-    QStringList paramList = par.split(QRegularExpression("[,;]+[\\s]*"), QString::SkipEmptyParts);
-#endif
     int parameters = paramList.count();
     boxParams->setRowCount(parameters);
     boxParams->hideColumn(2);
@@ -1276,13 +1264,8 @@ void FitDialog::setSrcTables(QList<MyWidget *> *tables)
     foreach (QWidget *i, *d_src_table)
         tableNamesBox->addItem(i->objectName());
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     tableNamesBox->setCurrentIndex(
             tableNamesBox->findText(boxCurve->currentText().split("_", Qt::SkipEmptyParts)[0]));
-#else
-    tableNamesBox->setCurrentIndex(tableNamesBox->findText(
-            boxCurve->currentText().split("_", QString::SkipEmptyParts)[0]));
-#endif
     selectSrcTable(tableNamesBox->currentIndex());
 }
 

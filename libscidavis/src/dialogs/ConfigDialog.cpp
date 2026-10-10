@@ -844,11 +844,7 @@ void ConfigDialog::languageChange()
     QFontMetrics fm(itemsList->font());
     int width = 32, i;
     for (i = 0; i < itemsList->count(); i++) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
-        auto newWidth = fm.width(itemsList->item(i)->text());
-#else
         auto newWidth = fm.horizontalAdvance(itemsList->item(i)->text());
-#endif
         if (newWidth > width)
             width = newWidth;
     }
@@ -1231,11 +1227,7 @@ void ConfigDialog::apply()
     QFontMetrics fm(itemsList->font());
     int width = 32, i;
     for (i = 0; i < itemsList->count(); i++) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
-        auto newWidth = fm.width(itemsList->item(i)->text());
-#else
         auto newWidth = fm.horizontalAdvance(itemsList->item(i)->text());
-#endif
         if (newWidth > width)
             width = newWidth;
     }

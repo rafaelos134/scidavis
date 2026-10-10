@@ -52,9 +52,7 @@
 #include <QtDebug>
 #include <QMimeData>
 #include "ApplicationWindow.h"
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
 #include <QRandomGenerator>
-#endif
 
 #include "table/TableModel.h"
 #include "table/TableView.h"
@@ -447,11 +445,7 @@ void Table::pasteIntoSelection(const bool isTransposed)
         QList<QStringList> cell_texts;
         QStringList input_rows(input_str.split(QRegularExpression("\\n|\\r\\n|\\r")));
         for (int i = 0; i < input_rows.count(); i++) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
             auto cells = input_rows.at(i).trimmed().split(QRegularExpression("( +|\\s)"), Qt::KeepEmptyParts);
-#else
-            auto cells = input_rows.at(i).trimmed().split(QRegularExpression("( +|\\s)"), QString::KeepEmptyParts);
-#endif
             if (isTransposed) {
                 for (; cells.count() > cell_texts.count();)
                     cell_texts.append(QStringList());
@@ -680,11 +674,7 @@ void Table::fillSelectedCellsWithRandomNumbers()
 
     WAIT_CURSOR;
     beginMacro(tr("%1: fill cells with random values").arg(name()));
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
     QRandomGenerator(QTime::currentTime().msec());
-#else
-    qsrand(QTime::currentTime().msec());
-#endif
     foreach (Column *col_ptr, d_view->selectedColumns()) {
         int col = columnIndex(col_ptr);
         switch (col_ptr->columnMode()) {
@@ -693,11 +683,7 @@ void Table::fillSelectedCellsWithRandomNumbers()
             for (int row = first; row <= last; row++)
                 if (d_view->isCellSelected(row, col))
                     results[row - first] =
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
                             QRandomGenerator::global()->generateDouble();
-#else
-                            double(qrand()) / double(RAND_MAX);
-#endif
                 else
                     results[row - first] = col_ptr->valueAt(row);
             col_ptr->replaceValues(first, results);
@@ -708,11 +694,7 @@ void Table::fillSelectedCellsWithRandomNumbers()
             for (int row = first; row <= last; row++)
                 if (d_view->isCellSelected(row, col))
                     results << QString::number(
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
                             QRandomGenerator::global()->generateDouble());
-#else
-                            double(qrand()) / double(RAND_MAX));
-#endif
                 else
                     results << col_ptr->textAt(row);
             col_ptr->replaceTexts(first, results);
@@ -727,19 +709,11 @@ void Table::fillSelectedCellsWithRandomNumbers()
             QTime midnight(0, 0, 0, 0);
             for (int row = first; row <= last; row++)
                 if (d_view->isCellSelected(row, col))
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
                     results << QDateTime(
                             earliestDate.addDays(QRandomGenerator::global()->generateDouble()
                                                  * ((double)earliestDate.daysTo(latestDate))),
                             midnight.addMSecs(QRandomGenerator::global()->generate64() * 1000 * 60
                                               * 60 * 24 / RAND_MAX));
-#else
-                    results << QDateTime(
-                            earliestDate.addDays(((double)qrand())
-                                                 * ((double)earliestDate.daysTo(latestDate))
-                                                 / ((double)RAND_MAX)),
-                            midnight.addMSecs(((qint64)qrand()) * 1000 * 60 * 60 * 24 / RAND_MAX));
-#endif
                 else
                     results << col_ptr->dateTimeAt(row);
             col_ptr->replaceDateTimes(first, results);

@@ -40,9 +40,7 @@
 #include <QClipboard>
 #include <QMouseEvent>
 
-#if QT_VERSION >= 0x040300
 #include <QSvgGenerator>
-#endif
 
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
@@ -676,14 +674,10 @@ void MultiLayer::exportVector(const QString &fileName, int, bool color, bool kee
     printer.setFullPage(true);
     printer.setOutputFileName(fileName);
     if (fileName.contains(".eps")) {
-#if QT_VERSION >= 0x050000
         QMessageBox::warning(this, tr("Warning"),
                              tr("Output in postscript format is not available for Qt5, using PDF"));
         printer.setOutputFormat(QPrinter::PdfFormat);
         printer.setOutputFileName(fileName + ".pdf");
-#else
-        printer.setOutputFormat(QPrinter::PostScriptFormat);
-#endif
     }
 
     if (color)
@@ -703,17 +697,13 @@ void MultiLayer::exportVector(const QString &fileName, int, bool color, bool kee
 
 void MultiLayer::exportSVG(const QString &fname)
 {
-#if QT_VERSION >= 0x040300
     QSvgGenerator generator;
     generator.setFileName(fname);
-#if QT_VERSION >= 0x040500
     generator.setSize(canvas->size());
     generator.setViewBox(QRect(QPoint(0, 0), generator.size()));
     generator.setResolution(96); // FIXME hardcored
     generator.setTitle(this->name());
-#endif
     exportPainter(generator);
-#endif
 }
 
 void MultiLayer::exportPainter(QPaintDevice &paintDevice, bool keepAspect, QRect rect)
@@ -997,13 +987,8 @@ void MultiLayer::wheelEvent(QWheelEvent *e)
     QSize intSize;
     Graph *resize_graph = 0;
     // Get the position of the mouse
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     int xMouse = e->position().x();
     int yMouse = e->position().y();
-#else
-    int xMouse = e->x();
-    int yMouse = e->y();
-#endif
     for (int i = 0; i < (int)graphsList.count(); i++) {
         Graph *gr = (Graph *)graphsList.at(i);
         intSize = gr->plotWidget()->size();

@@ -18,9 +18,7 @@
 #include "qwt_painter.h"
 #include "qwt_text_engine.h"
 #include "qwt_text.h"
-#if QT_VERSION >= 0x040000
 #include <qapplication.h>
-#endif
 
 class QwtTextEngineDict
 {
@@ -38,11 +36,7 @@ private:
 
     inline const QwtTextEngine *engine(EngineMap::const_iterator &it) const 
     {
-#if QT_VERSION < 0x040000
-        return it.data();
-#else
         return it.value();
-#endif
     }
 
     EngineMap d_map;
@@ -464,14 +458,10 @@ int QwtText::heightForWidth(int width, const QFont &defaultFont) const
     const QwtMetricsMap map = QwtPainter::metricsMap();
     width = map.layoutToScreenX(width);
 
-#if QT_VERSION < 0x040000
-    const QFont font = usedFont(defaultFont);
-#else
     // We want to calculate in screen metrics. So
     // we need a font that uses screen metrics
 
     const QFont font(usedFont(defaultFont));
-#endif
 
     int h = 0;
 
@@ -513,14 +503,10 @@ int QwtText::heightForWidth(int width, const QFont &defaultFont) const
 */
 QSize QwtText::textSize(const QFont &defaultFont) const
 {
-#if QT_VERSION < 0x040000
-    const QFont font(usedFont(defaultFont));
-#else
     // We want to calculate in screen metrics. So
     // we need a font that uses screen metrics
 
     const QFont font(usedFont(defaultFont));
-#endif
 
     if ( !d_layoutCache->textSize.isValid() 
         || d_layoutCache->font != font )
@@ -541,7 +527,6 @@ QSize QwtText::textSize(const QFont &defaultFont) const
             left, right, top, bottom);
         sz -= QSize(left + right, top + bottom);
 
-#if QT_VERSION >= 0x040000
         if ( !map.isIdentity() )
         {
 #ifdef __GNUC__
@@ -553,7 +538,6 @@ QSize QwtText::textSize(const QFont &defaultFont) const
              */
             sz += QSize(3, 2);
         }
-#endif
     }
 
     sz = map.screenToLayout(sz);
@@ -576,13 +560,9 @@ void QwtText::draw(QPainter *painter, const QRect &rect) const
             painter->save();
             painter->setPen(QwtPainter::scaledPen(d_data->backgroundPen));
             painter->setBrush(d_data->backgroundBrush);
-#if QT_VERSION < 0x040000
-            QwtPainter::drawRect(painter, rect);
-#else
             const QRect r(rect.x(), rect.y(), 
                 rect.width() - 1, rect.height() - 1);
             QwtPainter::drawRect(painter, r);
-#endif
             painter->restore();
         }
     }
@@ -603,14 +583,10 @@ void QwtText::draw(QPainter *painter, const QRect &rect) const
     QRect expandedRect = rect;
     if ( d_data->layoutAttributes & MinimumLayout )
     {
-#if QT_VERSION < 0x040000
-        const QFont font(painter->font());
-#else
         // We want to calculate in screen metrics. So
         // we need a font that uses screen metrics
 
         const QFont font(painter->font());
-#endif
 
         int left, right, top, bottom;
         d_data->textEngine->textMargins(
