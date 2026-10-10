@@ -29,6 +29,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "Matrix.h"
+#include "globals.h"
 #include "future/matrix/MatrixView.h"
 #include "ScriptEdit.h"
 
@@ -533,10 +534,8 @@ void Matrix::customEvent(QEvent *e)
 void Matrix::closeEvent(QCloseEvent *e)
 {
     if (askOnClose) {
-        switch (QMessageBox::information(this, tr("SciDAVis"),
-                                         tr("Do you want to hide or delete") + "<p><b>'"
-                                                 + objectName() + "'</b> ?",
-                                         tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2)) {
+        switch (SciDAVis::choice(this, QMessageBox::Information, tr("SciDAVis"), tr("Do you want to hide or delete") + "<p><b>'"
+                                                 + objectName() + "'</b> ?", { tr("Delete"), tr("Hide"), tr("Cancel") }, 0, 2)) {
         case 0:
             e->accept();
             d_future_matrix->remove();

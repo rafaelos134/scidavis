@@ -63,10 +63,10 @@ DataPickerTool::DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode,
 
     setTrackerMode(QwtPicker::AlwaysOn);
     if (d_mode == Move) {
-        setSelectionFlags(QwtPicker::PointSelection | QwtPicker::DragSelection);
+        setSelectionFlags(int(QwtPicker::PointSelection) | int(QwtPicker::DragSelection));
         d_graph->plotWidget()->canvas()->setCursor(Qt::PointingHandCursor);
     } else {
-        setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
+        setSelectionFlags(int(QwtPicker::PointSelection) | int(QwtPicker::ClickSelection));
         d_graph->plotWidget()->canvas()->setCursor(QCursor(QPixmap(":/vizor.xpm"), -1, -1));
     }
 

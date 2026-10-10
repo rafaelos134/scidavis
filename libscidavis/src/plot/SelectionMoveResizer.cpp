@@ -287,7 +287,17 @@ QRect SelectionMoveResizer::operateOn(const QRect in)
     default:
         return in;
     }
-    boundary_out = boundary_out.normalized();
+    // Qt 5 semantics of QRect::normalized(): only swap the corners (Qt 6 also shrinks by one pixel)
+    if (boundary_out.right() < boundary_out.left() - 1) {
+        const int left = boundary_out.left();
+        boundary_out.setLeft(boundary_out.right());
+        boundary_out.setRight(left);
+    }
+    if (boundary_out.bottom() < boundary_out.top() - 1) {
+        const int top = boundary_out.top();
+        boundary_out.setTop(boundary_out.bottom());
+        boundary_out.setBottom(top);
+    }
     if (in == d_bounding_rect)
         return boundary_out;
     double scale_x = ((double)boundary_out.width()) / d_bounding_rect.width();

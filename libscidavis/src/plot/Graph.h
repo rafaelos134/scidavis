@@ -712,7 +712,7 @@ public slots:
     static Qt::PenStyle getPenStyle(int style);
     static Qt::BrushStyle getBrushStyle(int style);
     static void showPlotErrorMessage(QWidget *parent, const QStringList &emptyColumns);
-    static QPrinter::PageSize minPageSize(const QPrinter &printer, const QRect &r);
+    static QPageSize::PageSizeId minPageSize(const QPrinter &printer, const QRect &r);
 
     void showTitleContextMenu();
     void copyTitle();

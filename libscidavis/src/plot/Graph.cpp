@@ -30,6 +30,7 @@
 #include <QVarLengthArray>
 
 #include "Graph.h"
+#include "globals.h"
 #include "Grid.h"
 #include "CanvasPicker.h"
 #include "QwtErrorPlotCurve.h"
@@ -70,7 +71,7 @@
 #include <QPrintDialog>
 #include <QImageWriter>
 #include <QFileInfo>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #if QT_VERSION >= 0x040300
 #include <QSvgGenerator>
@@ -144,11 +145,11 @@ Graph::Graph(QWidget *parent, QString name, Qt::WindowFlags f) : QWidget(parent,
     scalePicker = new ScalePicker(d_plot);
 
     d_zoomer[0] = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
-                                    QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+                                    int(QwtPicker::DragSelection) | int(QwtPicker::CornerToCorner),
                                     QwtPicker::AlwaysOff, d_plot->canvas());
     d_zoomer[0]->setRubberBandPen(QPen(Qt::black));
     d_zoomer[1] = new QwtPlotZoomer(QwtPlot::xTop, QwtPlot::yRight,
-                                    QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+                                    int(QwtPicker::DragSelection) | int(QwtPicker::CornerToCorner),
                                     QwtPicker::AlwaysOff, d_plot->canvas());
     zoom(false);
 
@@ -2007,7 +2008,7 @@ QString Graph::saveFonts()
     f = d_plot->title().font();
     list << f.family();
     list << QString::number(f.pointSize());
-    list << QString::number(f.weight());
+    list << QString::number(SciDAVis::fontWeightToLegacy(f.weight()));
     list << QString::number(f.italic());
     list << QString::number(f.underline());
     list << QString::number(f.strikeOut());
@@ -2018,7 +2019,7 @@ QString Graph::saveFonts()
         list[0] = "ScaleFont" + QString::number(i);
         list[1] = f.family();
         list[2] = QString::number(f.pointSize());
-        list[3] = QString::number(f.weight());
+        list[3] = QString::number(SciDAVis::fontWeightToLegacy(f.weight()));
         list[4] = QString::number(f.italic());
         list[5] = QString::number(f.underline());
         list[6] = QString::number(f.strikeOut());
@@ -2030,7 +2031,7 @@ QString Graph::saveFonts()
         list[0] = "AxisFont" + QString::number(i);
         list[1] = f.family();
         list[2] = QString::number(f.pointSize());
-        list[3] = QString::number(f.weight());
+        list[3] = QString::number(SciDAVis::fontWeightToLegacy(f.weight()));
         list[4] = QString::number(f.italic());
         list[5] = QString::number(f.underline());
         list[6] = QString::number(f.strikeOut());
@@ -2488,7 +2489,7 @@ long Graph::insertTextMarker(const QStringList &list, int fileVersion)
     else
         mrk->setOriginCoord(fList[1].toDouble(), fList[2].toDouble());
 
-    QFont fnt = QFont(fList[3], fList[4].toInt(), fList[5].toInt(), fList[6].toInt());
+    QFont fnt = QFont(fList[3], fList[4].toInt(), SciDAVis::fontWeightFromLegacy(fList[5].toInt()), fList[6].toInt());
     fnt.setUnderline(fList[7].toInt());
     fnt.setStrikeOut(fList[8].toInt());
     mrk->setFont(fnt);
@@ -2683,7 +2684,7 @@ QString Graph::saveMarkers()
         QFont f = mrk->font();
         s += f.family() + "\t";
         s += QString::number(f.pointSize()) + "\t";
-        s += QString::number(f.weight()) + "\t";
+        s += QString::number(SciDAVis::fontWeightToLegacy(f.weight())) + "\t";
         s += QString::number(f.italic()) + "\t";
         s += QString::number(f.underline()) + "\t";
         s += QString::number(f.strikeOut()) + "\t";
@@ -3488,7 +3489,7 @@ void Graph::removeCurves(const QString &s)
         if (((PlotCurve *)it)->type() == Function)
             continue;
 
-        if (((DataCurve *)it)->plotAssociation().contains(QRegExp("\b" + s + "\b")))
+        if (((DataCurve *)it)->plotAssociation().contains(QRegularExpression("\b" + s + "\b")))
             removeCurve(i);
     }
     d_plot->replot();
@@ -3573,16 +3574,18 @@ void Graph::removeLegendItem(int index)
         items.removeAll(l[0]); // remove the corresponding legend string
     text = items.join("\n") + "\n";
 
-    QRegExp itemCmd("\\\\c\\{(\\d+)\\}");
+    QRegularExpression itemCmdRx("\\\\c\\{(\\d+)\\}");
     int pos = 0;
-    while ((pos = itemCmd.indexIn(text, pos)) != -1) {
-        int nr = itemCmd.cap(1).toInt();
+    QRegularExpressionMatch itemCmd;
+    while ((itemCmd = itemCmdRx.match(text, pos)).hasMatch()) {
+        pos = itemCmd.capturedStart();
+        int nr = itemCmd.captured(1).toInt();
         if (nr > index) {
             QString subst = QString("\\c{") + QString::number(nr - 1) + "}";
-            text.replace(pos, itemCmd.matchedLength(), subst);
+            text.replace(pos, itemCmd.capturedLength(), subst);
             pos += subst.length();
         } else
-            pos += itemCmd.matchedLength();
+            pos += itemCmd.capturedLength();
     }
 
     mrk->setText(text);
@@ -4349,8 +4352,8 @@ void Graph::showAxisContextMenu(int axis)
     selectedAxis = axis;
 
     QMenu menu(this);
-    menu.addAction(QPixmap(":/unzoom.xpm"), tr("&Rescale to show all"), this, SLOT(setAutoScale()),
-                   tr("Ctrl+Shift+R"));
+    menu.addAction(QPixmap(":/unzoom.xpm"), tr("&Rescale to show all"),
+                   QKeySequence(tr("Ctrl+Shift+R")), this, SLOT(setAutoScale()));
     menu.addSeparator();
     menu.addAction(tr("&Hide axis"), this, SLOT(hideSelectedAxis()));
 
@@ -5238,7 +5241,7 @@ int Graph::visibleCurves()
     return c;
 }
 
-QPrinter::PageSize Graph::minPageSize(const QPrinter &printer, const QRect &r)
+QPageSize::PageSizeId Graph::minPageSize(const QPrinter &printer, const QRect &r)
 {
     double x_margin = 0.2 / 2.54 * printer.logicalDpiX(); // 2 mm margins
     double y_margin = 0.2 / 2.54 * printer.logicalDpiY();
@@ -5254,61 +5257,61 @@ QPrinter::PageSize Graph::minPageSize(const QPrinter &printer, const QRect &r)
         w = (int)ceil(h_mm);
     }
 
-    QPrinter::PageSize size = QPrinter::A5;
+    QPageSize::PageSizeId size = QPageSize::A5;
     if (w < 45 && h < 32)
-        size = QPrinter::B10;
+        size = QPageSize::B10;
     else if (w < 52 && h < 37)
-        size = QPrinter::A9;
+        size = QPageSize::A9;
     else if (w < 64 && h < 45)
-        size = QPrinter::B9;
+        size = QPageSize::B9;
     else if (w < 74 && h < 52)
-        size = QPrinter::A8;
+        size = QPageSize::A8;
     else if (w < 91 && h < 64)
-        size = QPrinter::B8;
+        size = QPageSize::B8;
     else if (w < 105 && h < 74)
-        size = QPrinter::A7;
+        size = QPageSize::A7;
     else if (w < 128 && h < 91)
-        size = QPrinter::B7;
+        size = QPageSize::B7;
     else if (w < 148 && h < 105)
-        size = QPrinter::A6;
+        size = QPageSize::A6;
     else if (w < 182 && h < 128)
-        size = QPrinter::B6;
+        size = QPageSize::B6;
     else if (w < 210 && h < 148)
-        size = QPrinter::A5;
+        size = QPageSize::A5;
     else if (w < 220 && h < 110)
-        size = QPrinter::DLE;
+        size = QPageSize::DLE;
     else if (w < 229 && h < 163)
-        size = QPrinter::C5E;
+        size = QPageSize::C5E;
     else if (w < 241 && h < 105)
-        size = QPrinter::Comm10E;
+        size = QPageSize::Comm10E;
     else if (w < 257 && h < 182)
-        size = QPrinter::B5;
+        size = QPageSize::B5;
     else if (w < 279 && h < 216)
-        size = QPrinter::Letter;
+        size = QPageSize::Letter;
     else if (w < 297 && h < 210)
-        size = QPrinter::A4;
+        size = QPageSize::A4;
     else if (w < 330 && h < 210)
-        size = QPrinter::Folio;
+        size = QPageSize::Folio;
     else if (w < 356 && h < 216)
-        size = QPrinter::Legal;
+        size = QPageSize::Legal;
     else if (w < 364 && h < 257)
-        size = QPrinter::B4;
+        size = QPageSize::B4;
     else if (w < 420 && h < 297)
-        size = QPrinter::A3;
+        size = QPageSize::A3;
     else if (w < 515 && h < 364)
-        size = QPrinter::B3;
+        size = QPageSize::B3;
     else if (w < 594 && h < 420)
-        size = QPrinter::A2;
+        size = QPageSize::A2;
     else if (w < 728 && h < 515)
-        size = QPrinter::B2;
+        size = QPageSize::B2;
     else if (w < 841 && h < 594)
-        size = QPrinter::A1;
+        size = QPageSize::A1;
     else if (w < 1030 && h < 728)
-        size = QPrinter::B1;
+        size = QPageSize::B1;
     else if (w < 1189 && h < 841)
-        size = QPrinter::A0;
+        size = QPageSize::A0;
     else if (w < 1456 && h < 1030)
-        size = QPrinter::B0;
+        size = QPageSize::B0;
 
     return size;
 }

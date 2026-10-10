@@ -52,7 +52,7 @@ QwtPlotZoomer::QwtPlotZoomer(QwtPlotCanvas *canvas, bool doReplot):
     QwtPlotPicker(canvas)
 {
     if ( canvas )
-        init(RectSelection | ClickSelection, ActiveOnly, doReplot);
+        init(int(RectSelection) | int(ClickSelection), ActiveOnly, doReplot);
 }
 
 /*!
@@ -77,7 +77,7 @@ QwtPlotZoomer::QwtPlotZoomer(int xAxis, int yAxis,
     QwtPlotPicker(xAxis, yAxis, canvas)
 {
     if ( canvas )
-        init(RectSelection | ClickSelection, ActiveOnly, doReplot);
+        init(int(RectSelection) | int(ClickSelection), ActiveOnly, doReplot);
 }
 
 /*!

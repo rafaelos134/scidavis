@@ -118,7 +118,7 @@ PlotWizard::PlotWizard(QWidget *parent, Qt::WindowFlags fl) : QDialog(parent, fl
     vlayout->addLayout(bottomLayout);
 
     // signals and slots connections
-    connect(boxTables, SIGNAL(activated(const QString &)), this,
+    connect(boxTables, SIGNAL(textActivated(const QString &)), this,
             SLOT(changeColumnsList(const QString &)));
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(accept()));
     connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));

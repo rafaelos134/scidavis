@@ -144,7 +144,7 @@ bool CanvasPicker::eventFilter(QObject *object, QEvent *e)
             ArrowMarker mrk;
             mrk.attach(g->plotWidget());
             mrk.setStartPoint(startLinePoint);
-            mrk.setEndPoint(QPoint(me->x(), me->y()));
+            mrk.setEndPoint(me->position().toPoint());
             mrk.setColor(g->arrowDefaultColor());
             mrk.setWidth(g->arrowDefaultWidth());
             mrk.setStyle(g->arrowLineDefaultStyle());

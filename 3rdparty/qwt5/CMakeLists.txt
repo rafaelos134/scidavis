@@ -1,14 +1,14 @@
 cmake_minimum_required( VERSION 3.16.3 )
 
-project( qwt5-qt5
+# Qwt 5.2.3 as used by SciDAVis, ported to Qt 6.
+# Vendored from https://github.com/SciDAVis/qwt5-qt5 (commit 511b07e); only the
+# library sources are kept (no docs, examples or Designer plugin).
+project( qwt5
   VERSION 5.2.3
-  DESCRIPTION "Qt Widgets for Technical Applications adapted to work with Qt5"
-  HOMEPAGE_URL "https://github.com/SciDAVis/qwt5-qt5"
+  DESCRIPTION "Qt Widgets for Technical Applications (Qwt 5), ported to Qt 6"
   LANGUAGES CXX )
 
-include(GNUInstallDirs)
-
-set( CMAKE_CXX_STANDARD 17)
+set( CMAKE_CXX_STANDARD 20 )
 set( CMAKE_CXX_STANDARD_REQUIRED TRUE )
 set( CMAKE_CXX_EXTENSIONS OFF )
 
@@ -26,17 +26,9 @@ if( MSVC )
   endif()
 else()
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -Wall -Wextra -pedantic" )
-  set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic" )
 endif()
 
-find_package( Qt5
-  COMPONENTS
-  Core
-  Gui
-  Widgets
-  PrintSupport
-  REQUIRED
-  )
+find_package( Qt6 6.8 COMPONENTS Core Gui Widgets PrintSupport REQUIRED )
 
 option( QWT_PLOT "Enable all classes, that are needed to use the QwtPlot widget" ON )
 
@@ -45,32 +37,7 @@ option( QWT_WIDGETS "Enable all classes, that are needed to use the all other wi
 
 option( QWT_SVG_ITEM "Display SVG images on the plot canvas" ON )
 if( QWT_SVG_ITEM )
-  find_package( Qt5 COMPONENTS Svg REQUIRED )
+  find_package( Qt6 COMPONENTS Svg REQUIRED )
 endif()
-
-option( QWT_DESIGNER "Build Designer Plugin" ON )
-if( QWT_DESIGNER )
-  find_package( Qt5 COMPONENTS Designer REQUIRED )
-endif()
-
-option( BUILD_EXAMPLES "Build Examples" ON )
 
 add_subdirectory( src )
-
-if( QWT_DESIGNER AND (${PROJECT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR}) )
-  add_subdirectory( designer )
-endif()
-
-if( BUILD_EXAMPLES AND (${PROJECT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR}) )
-  add_subdirectory( examples )
-endif()
-
-if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
-  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/qwt5-qt5.pc.in" "${CMAKE_CURRENT_BINARY_DIR}/qwt5-qt5.pc" @ONLY )
-  install( FILES "${CMAKE_CURRENT_BINARY_DIR}/qwt5-qt5.pc" DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig )
-
-  install( DIRECTORY ${PROJECT_SOURCE_DIR}/doc/html/ DESTINATION ${CMAKE_INSTALL_DOCDIR}/html )
-  if( UNIX )
-    install( DIRECTORY ${PROJECT_SOURCE_DIR}/doc/man/ DESTINATION ${CMAKE_INSTALL_MANDIR} )
-  endif()
-endif()

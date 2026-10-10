@@ -28,7 +28,7 @@
  ***************************************************************************/
 #include "AbstractAspect.h"
 #include "AspectPrivate.h"
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QStringList>
 #include <stdexcept>
 using namespace std;
@@ -169,11 +169,13 @@ int AbstractAspect::Private::indexOfMatchingBrace(const QString &str, int start)
 QString AbstractAspect::Private::caption() const
 {
     QString result = d_caption_spec;
-    QRegExp magic("%(.)");
-    for (int pos = magic.indexIn(result, 0); pos >= 0; pos = magic.indexIn(result, pos)) {
+    QRegularExpression magicRx("%(.)");
+    QRegularExpressionMatch magic;
+    for (int pos = 0; (magic = magicRx.match(result, pos)).hasMatch();) {
+        pos = magic.capturedStart();
         QString replacement;
         int length;
-        switch (magic.cap(1).at(0).toLatin1()) {
+        switch (magic.captured(1).at(0).toLatin1()) {
         case '%':
             replacement = "%";
             length = 2;

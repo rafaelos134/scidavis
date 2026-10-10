@@ -361,31 +361,22 @@ target_link_libraries( libscidavis
   OpenGL::GLU
   ${MUPARSER_LIB}
   minigzip
-  Qt5::Core
-  Qt5::Gui
-  Qt5::PrintSupport
-  Qt5::OpenGL
-  Qt5::Svg
+  Qt6::Core
+  Qt6::Gui
+  Qt6::Widgets
+  Qt6::PrintSupport
+  Qt6::OpenGL
+  Qt6::OpenGLWidgets
+  Qt6::Svg
+  Qt6::Xml
   m
   )
 
 target_include_directories( libscidavis PUBLIC ${MUPARSER_INCLUDE_DIR} )
 
-if( NOT BUILD_QWT )
-  target_include_directories( libscidavis PUBLIC ${QWT_INCLUDE_DIR} )
-  target_link_libraries( libscidavis ${QWT_LIBRARY} )
-else()
-  target_include_directories( libscidavis PUBLIC
-    "${CMAKE_SOURCE_DIR}/3rdparty/qwt5-qt5/src" )
-  target_link_libraries( libscidavis qwt5-qt5 )
-endif()
+# bundled Qwt 5 (ported to Qt 6) and QwtPlot3D, see 3rdparty/CMakeLists.txt
+target_link_libraries( libscidavis qwt5 qwtplot3d )
 
-if( NOT BUILD_QWTPLOT3D )
-  target_include_directories( libscidavis PUBLIC ${QWTPLOT3D_INCLUDE_DIR} )
-  target_link_libraries( libscidavis ${QWTPLOT3D_LIBRARY} )
-else()
-  target_link_libraries( libscidavis qwtplot3d )
-endif()
 
 if( SCRIPTING_PYTHON )
   target_include_directories( libscidavis PUBLIC ${Python3_INCLUDE_DIRS} )
@@ -464,8 +455,8 @@ if( SCRIPTING_PYTHON )
   endif()
 endif()
 
-if( SEARCH_FOR_UPDATE OR DOWNLOAD_LINKS )
-  target_link_libraries( libscidavis Qt5::Network )
+if( SEARCH_FOR_UPDATES OR DOWNLOAD_LINKS )
+  target_link_libraries( libscidavis Qt6::Network )
 endif()
 
 # Every module folder is on the include path, so headers are included by
@@ -567,7 +558,7 @@ if( SCRIPTING_PYTHON )
     )
 
   if( SIP_VERSION VERSION_GREATER_EQUAL 5 )
-    get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
+    get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
     add_custom_command(
       OUTPUT ${scidavis_PyQt_HDR} ${scidavis_PyQt_SRC} ${scidavis_SIP_HDR}
       COMMAND ${SIP_EXECUTABLE} --no-make --qmake=${_qmake_executable}

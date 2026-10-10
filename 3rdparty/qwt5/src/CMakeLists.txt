@@ -155,31 +155,12 @@ if( QWT_WIDGETS )
     )
 endif()
 
-add_library( qwt5-qt5 ${SRCS} ${HEADERS} )
+add_library( qwt5 STATIC ${SRCS} ${HEADERS} )
 
-target_link_libraries( qwt5-qt5 Qt5::Core Qt5::Gui Qt5::Widgets Qt5::PrintSupport )
+target_link_libraries( qwt5 PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::PrintSupport )
 
-target_include_directories( qwt5-qt5 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
+target_include_directories( qwt5 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
 
 if( QWT_SVG_ITEM )
-  target_link_libraries( qwt5-qt5 Qt5::Svg )
-endif()
-
-if( WIN32 AND BUILD_SHARED_LIBS )
-  target_compile_definitions( qwt5-qt5 PRIVATE QWT_DLL QWT_MAKEDLL )
-endif()
-
-# Don't install qwt5-qt5 static library and headers if it is built as a subproject
-if( "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}" )
-  install( TARGETS qwt5-qt5
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/qwt5-qt5
-    )
-elseif( BUILD_SHARED_LIBS )
-  install( TARGETS qwt5-qt5
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
+  target_link_libraries( qwt5 PUBLIC Qt6::Svg )
 endif()

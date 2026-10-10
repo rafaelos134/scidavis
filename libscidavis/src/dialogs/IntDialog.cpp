@@ -88,7 +88,7 @@ IntDialog::IntDialog(QWidget *parent, Qt::WindowFlags fl) : QDialog(parent, fl)
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(accept()));
     connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
     connect(buttonHelp, SIGNAL(clicked()), this, SLOT(help()));
-    connect(boxName, SIGNAL(activated(const QString &)), this,
+    connect(boxName, SIGNAL(textActivated(const QString &)), this,
             SLOT(activateCurve(const QString &)));
 }
 

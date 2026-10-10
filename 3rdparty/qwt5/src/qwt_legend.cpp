@@ -559,7 +559,7 @@ void QwtLegend::layoutContents()
     {
         const QwtDynGridLayout *tl = (const QwtDynGridLayout *)l;
 
-        const int minW = int(tl->maxItemWidth()) + 2 * tl->margin();
+        const int minW = int(tl->maxItemWidth()) + 2 * tl->contentsMargins().left();
 
         int w = qwtMax(visibleSize.width(), minW);
         int h = qwtMax(tl->heightForWidth(w), visibleSize.height());

@@ -33,6 +33,8 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
+#include <QMessageBox>
 
 //! Definition of global constants and enums
 /**
@@ -95,6 +97,22 @@ public:
 
     //! Show about dialog
     static void about();
+
+    //! Show a message box with custom button texts and return the index of the clicked button.
+    /**
+     * Replacement for the QMessageBox::information/question/warning overloads taking button
+     * texts, which are deprecated in Qt 6. Empty texts are skipped (indexes are kept),
+     * \a defaultButton is focused, Escape activates \a escapeButton (none if negative) and -1 is
+     * returned when the box is closed without clicking a button.
+     */
+    //! Font weight as stored in project files and settings (Qt 5 scale, 0..99; e.g. bold = 75)
+    static int fontWeightToLegacy(int weight);
+    //! Inverse of fontWeightToLegacy(): Qt 5 weight scale to Qt 6 (OpenType 100..900, bold = 700)
+    static int fontWeightFromLegacy(int legacyWeight);
+
+    static int choice(QWidget *parent, QMessageBox::Icon icon, const QString &title,
+                      const QString &text, const QStringList &buttons, int defaultButton = 0,
+                      int escapeButton = -1);
 
 private:
     //  Don't forget to change the Doxyfile when changing these!

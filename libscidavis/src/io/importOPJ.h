@@ -33,7 +33,7 @@
 
 #include "ApplicationWindow.h"
 #include <OriginFile.h>
-#include <QTextCodec>
+#include <QStringDecoder>
 
 //! Origin project import class
 class ImportOPJ
@@ -57,7 +57,7 @@ private:
     int parse_error;
     int xoffset;
     ApplicationWindow *mw;
-    QTextCodec *d_codec; // the codec object is owned by Qt, this is actually a weak pointer.
+    QString d_codec_name; // empty: input is decoded as UTF-8
 };
 
 #endif // IMPORTOPJ_H

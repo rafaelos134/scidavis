@@ -34,7 +34,7 @@
 #include "future/core/datatypes/Double2StringFilter.h"
 #include "future/core/datatypes/DateTime2StringFilter.h"
 
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QApplication>
 #include <QMessageBox>
 #include <QDockWidget>
@@ -52,19 +52,28 @@
 
 bool ImportOPJ::setCodec(const QString &codecName)
 {
-    auto codec = QTextCodec::codecForName(codecName.toUtf8());
-    if (nullptr != codec) {
-        d_codec = codec;
-        return true;
-    }
-    return false;
+    if (!QStringDecoder(codecName).isValid())
+        return false;
+    d_codec_name = codecName;
+    return true;
 }
 
 QString ImportOPJ::decodeMbcs(char const *const input) const
 {
-    if (nullptr != d_codec)
-        return d_codec->toUnicode(input);
+    if (!d_codec_name.isEmpty()) {
+        QStringDecoder decoder(d_codec_name);
+        if (decoder.isValid())
+            return decoder(QByteArrayView(input));
+    }
     return QString(input);
+}
+
+//! QRegExp::indexIn() replacement: position of the first match at or after \a from, or -1
+static int indexIn(const QRegularExpression &rx, const QString &str, QRegularExpressionMatch &match,
+                   int from = 0)
+{
+    match = rx.match(str, from);
+    return match.hasMatch() ? match.capturedStart() : -1;
 }
 
 QString strreverse(const QString &str) // QString reversing
@@ -77,12 +86,12 @@ QString strreverse(const QString &str) // QString reversing
 QString posixTimeToString(time_t pt)
 {
     QDateTime qdt;
-    qdt.setTime_t(pt);
+    qdt.setSecsSinceEpoch(pt);
     return qdt.toString("dd.MM.yyyy hh.mm.ss");
 }
 
 ImportOPJ::ImportOPJ(ApplicationWindow *app, const QString &filename, const QString &codec)
-    : mw(app), d_codec(nullptr)
+    : mw(app)
 {
     setCodec(codec);
     xoffset = 0;
@@ -121,8 +130,11 @@ bool ImportOPJ::createProjectTree(const OriginFile &opj)
     Folder *projectFolder = mw->projectFolder();
     QHash<tree<Origin::ProjectNode>::iterator, Folder *> parent;
     parent[root] = projectFolder;
-    for (tree<Origin::ProjectNode>::iterator sib = projectTree->begin(root);
-         sib != projectTree->end(root); ++sib) {
+    // pre-order traversal of the subtree below root (end converted explicitly: comparing a
+    // pre_order_iterator with a sibling_iterator is ambiguous in C++20)
+    const tree<Origin::ProjectNode>::iterator subtreeEnd = projectTree->end(root);
+    for (tree<Origin::ProjectNode>::iterator sib = projectTree->begin(root); sib != subtreeEnd;
+         ++sib) {
         if (sib->type == Origin::ProjectNode::Folder) {
 
             Folder &f = parent.value(projectTree->parent(sib))
@@ -135,9 +147,10 @@ bool ImportOPJ::createProjectTree(const OriginFile &opj)
         } else {
             QString name = decodeMbcs(sib->name.c_str());
             if (sib->type == Origin::ProjectNode::Note) {
-                QRegExp rx("^@\\((\\S+)\\)$");
-                if (rx.indexIn(name) == 0)
-                    name = rx.cap(1);
+                QRegularExpressionMatch m =
+                        QRegularExpression("^@\\((\\S+)\\)$").match(name);
+                if (m.hasMatch())
+                    name = m.captured(1);
             }
             const char *nodetype;
             switch (sib->type) {
@@ -236,7 +249,7 @@ bool ImportOPJ::importSpreadsheet(const OriginFile &opj, const Origin::SpreadShe
         Column *scidavis_column = table->column(j);
 
         QString name(decodeMbcs(column.name.c_str()));
-        scidavis_column->setName(name.replace(QRegExp(".*_"), ""));
+        scidavis_column->setName(name.replace(QRegularExpression(".*_"), ""));
         if (column.command.size() > 0)
             scidavis_column->setFormula(Interval<int>(0, maxrows),
                                         QString(decodeMbcs(column.command.c_str())));
@@ -610,8 +623,7 @@ bool ImportOPJ::importNotes(const OriginFile &opj)
     for (unsigned int n = 0; n < opj.noteCount(); ++n) {
         Origin::Note _note = opj.note(n);
         QString name = decodeMbcs(_note.name.c_str());
-        QRegExp rx("^@(\\S+)$");
-        if (rx.indexIn(name) == 0) {
+        if (QRegularExpression("^@(\\S+)$").match(name).hasMatch()) {
             name = name.mid(2, name.length() - 3);
         }
         Note *note = mw->newNote(name);
@@ -1132,48 +1144,49 @@ QString ImportOPJ::parseOriginTags(const QString &str)
 {
     QString line = str;
     // replace \l(...) and %(...) tags
-    QRegExp rxline("\\\\\\s*l\\s*\\(\\s*\\d+\\s*\\)");
-    QRegExp rxcol("\\%\\(\\d+\\)");
-    int pos = rxline.indexIn(line);
+    QRegularExpression rxline("\\\\\\s*l\\s*\\(\\s*\\d+\\s*\\)");
+    QRegularExpressionMatch m;
+    int pos = indexIn(rxline, line, m);
     while (pos > -1) {
-        QString value = rxline.cap(0);
+        QString value = m.captured(0);
         int len = value.length();
-        value.replace(QRegExp(" "), "");
+        value.replace(QRegularExpression(" "), "");
         value = "\\c{" + value.mid(3, value.length() - 4) + "}";
         line.replace(pos, len, value);
-        pos = rxline.indexIn(line);
+        pos = indexIn(rxline, line, m);
     }
     // Lookbehind conditions are not supported - so need to reverse string
-    QRegExp rx("\\)[^\\)\\(]*\\((?!\\s*[buig\\+\\-]\\s*\\\\)");
-    QRegExp rxfont("\\)[^\\)\\(]*\\((?![^\\:]*\\:f\\s*\\\\)");
+    QRegularExpression rx("\\)[^\\)\\(]*\\((?!\\s*[buig\\+\\-]\\s*\\\\)");
+    QRegularExpression rxfont("\\)[^\\)\\(]*\\((?![^\\:]*\\:f\\s*\\\\)");
+    QRegularExpressionMatch m1, m2;
     QString linerev = strreverse(line);
     QString lBracket = strreverse("&lbracket;");
     QString rBracket = strreverse("&rbracket;");
     QString ltagBracket = strreverse("&ltagbracket;");
     QString rtagBracket = strreverse("&rtagbracket;");
-    int pos1 = rx.indexIn(linerev);
-    int pos2 = rxfont.indexIn(linerev);
+    int pos1 = indexIn(rx, linerev, m1);
+    int pos2 = indexIn(rxfont, linerev, m2);
 
     while (pos1 > -1 || pos2 > -1) {
         if (pos1 == pos2) {
-            QString value = rx.cap(0);
+            QString value = m1.captured(0);
             int len = value.length();
             value = rBracket + value.mid(1, len - 2) + lBracket;
             linerev.replace(pos1, len, value);
         } else if ((pos1 > pos2 && pos2 != -1) || pos1 == -1) {
-            QString value = rxfont.cap(0);
+            QString value = m2.captured(0);
             int len = value.length();
             value = rtagBracket + value.mid(1, len - 2) + ltagBracket;
             linerev.replace(pos2, len, value);
         } else if ((pos2 > pos1 && pos1 != -1) || pos2 == -1) {
-            QString value = rx.cap(0);
+            QString value = m1.captured(0);
             int len = value.length();
             value = rtagBracket + value.mid(1, len - 2) + ltagBracket;
             linerev.replace(pos1, len, value);
         }
 
-        pos1 = rx.indexIn(linerev);
-        pos2 = rxfont.indexIn(linerev);
+        pos1 = indexIn(rx, linerev, m1);
+        pos2 = indexIn(rxfont, linerev, m2);
     }
     linerev.replace(ltagBracket, "(");
     linerev.replace(rtagBracket, ")");
@@ -1189,16 +1202,16 @@ QString ImportOPJ::parseOriginTags(const QString &str)
         "<b>", "<i>", "<u>", "<font face=Symbol>", "<sup>", "<sub>", "<font face=%1>"
     };
     QString rtag[] = { "</b>", "</i>", "</u>", "</font>", "</sup>", "</sub>", "</font>" };
-    QRegExp rxtags[7];
+    QRegularExpression rxtags[7];
     for (int i = 0; i < 7; ++i)
         rxtags[i].setPattern(rxstr[i] + "[^\\(\\)]*\\)");
 
     bool flag = true;
     while (flag) {
         for (int i = 0; i < 7; ++i) {
-            postag[i] = rxtags[i].indexIn(line);
+            postag[i] = indexIn(rxtags[i], line, m);
             while (postag[i] > -1) {
-                QString value = rxtags[i].cap(0);
+                QString value = m.captured(0);
                 int len = value.length();
                 int pos2 = value.indexOf("(");
                 if (i < 6)
@@ -1209,12 +1222,12 @@ QString ImportOPJ::parseOriginTags(const QString &str)
                             + value.mid(pos2 + 1, len - pos2 - 2) + rtag[i];
                 }
                 line.replace(postag[i], len, value);
-                postag[i] = rxtags[i].indexIn(line);
+                postag[i] = indexIn(rxtags[i], line, m);
             }
         }
         flag = false;
         for (int i = 0; i < 7; ++i) {
-            if (rxtags[i].indexIn(line) > -1) {
+            if (indexIn(rxtags[i], line, m) > -1) {
                 flag = true;
                 break;
             }
@@ -1223,16 +1236,16 @@ QString ImportOPJ::parseOriginTags(const QString &str)
 
     // replace unclosed tags
     for (int i = 0; i < 6; ++i)
-        line.replace(QRegExp(rxstr[i]), ltag[i]);
+        line.replace(QRegularExpression(rxstr[i]), ltag[i]);
     rxfont.setPattern(rxstr[6]);
-    pos = rxfont.indexIn(line);
+    pos = indexIn(rxfont, line, m);
     while (pos > -1) {
-        QString value = rxfont.cap(0);
+        QString value = m.captured(0);
         int len = value.length();
         int posfont = value.indexOf("f:");
         value = ltag[6].arg(value.mid(posfont + 2, len - posfont - 3));
         line.replace(pos, len, value);
-        pos = rxfont.indexIn(line);
+        pos = indexIn(rxfont, line, m);
     }
 
     line.replace("&lbracket;", "(");

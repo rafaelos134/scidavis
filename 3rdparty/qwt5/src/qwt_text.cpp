@@ -20,7 +20,6 @@
 #include "qwt_text.h"
 #if QT_VERSION >= 0x040000
 #include <qapplication.h>
-#include <qdesktopwidget.h>
 #endif
 
 class QwtTextEngineDict
@@ -471,7 +470,7 @@ int QwtText::heightForWidth(int width, const QFont &defaultFont) const
     // We want to calculate in screen metrics. So
     // we need a font that uses screen metrics
 
-    const QFont font(usedFont(defaultFont), QApplication::desktop());
+    const QFont font(usedFont(defaultFont));
 #endif
 
     int h = 0;
@@ -520,7 +519,7 @@ QSize QwtText::textSize(const QFont &defaultFont) const
     // We want to calculate in screen metrics. So
     // we need a font that uses screen metrics
 
-    const QFont font(usedFont(defaultFont), QApplication::desktop());
+    const QFont font(usedFont(defaultFont));
 #endif
 
     if ( !d_layoutCache->textSize.isValid() 
@@ -610,7 +609,7 @@ void QwtText::draw(QPainter *painter, const QRect &rect) const
         // We want to calculate in screen metrics. So
         // we need a font that uses screen metrics
 
-        const QFont font(painter->font(), QApplication::desktop());
+        const QFont font(painter->font());
 #endif
 
         int left, right, top, bottom;

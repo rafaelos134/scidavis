@@ -2,7 +2,7 @@
 
 **SciDAVis** (*Sci*entific *D*ata *A*nalysis and *Vis*ualization) é um aplicativo
 livre (GPL v2+) para análise e visualização de dados científicos, escrito em
-C++17 com Qt 5. Roda em Linux, Windows e macOS.
+C++20 com Qt 6 (6.8 LTS). Roda em Linux, Windows e macOS.
 
 - Manual do usuário: <https://highperformancecoder.github.io/scidavis-handbook/>
 - Site: <http://scidavis.sourceforge.net>
@@ -36,7 +36,7 @@ C++17 com Qt 5. Roda em Linux, Windows e macOS.
 | **Ajuste de curvas (fit)** | Linear, polinomial, exponencial (1, 2 e 3 termos), sigmoidal (Boltzmann), Gauss, Lorentz, multi-picos, função definida pelo usuário e plugins | `analysis/fit/` |
 | **Análise numérica** | Derivada, integral, interpolação, suavização, FFT, filtros FFT, convolução/deconvolução, correlação | `analysis/` |
 | **Estatística** | Estatísticas de linhas/colunas (média, desvio-padrão, variância, soma, min/max) | `project/TableStatistics.*` |
-| **Scripting** | Fórmulas com muParser e scripts Python (via SIP/PyQt) | `scripting/` |
+| **Scripting** | Fórmulas com muParser; scripts Python (SIP/PyQt) ainda não disponíveis no Qt 6 | `scripting/` |
 | **Notas** | Janelas de texto/script dentro do projeto | `project/Note.*` |
 | **Importar/Exportar** | ASCII/CSV, projetos do Origin (`.opj`), tabelas em LaTeX, exportação de imagens (PNG, SVG, PDF, EPS…) | `io/`, `dialogs/ImportASCIIDialog.*`, `dialogs/ImageExportDialog.*` |
 | **Projetos** | Arquivo `.sciprj` com pastas, tabelas, matrizes, gráficos e notas | `app/ApplicationWindow.*`, `project/Folder.*`, `future/core/Project.*` |
@@ -47,12 +47,12 @@ C++17 com Qt 5. Roda em Linux, Windows e macOS.
 
 ```
 scidavis/
-├── CMakeLists.txt          # Build principal (CMake) — forma recomendada
-├── scidavis.pro, config.pri# Build legado (qmake) — ainda mantido em paralelo
+├── CMakeLists.txt          # Build (CMake) — único suportado
+├── scidavis.pro, config.pri# Build legado (qmake, Qt 5) — NÃO funciona mais, só histórico
 ├── libscidavis/            # >>> Biblioteca com TODA a lógica do programa <<<
 │   ├── CMakeLists.txt      #   lista de fontes para o CMake
-│   ├── sourcefiles.pri     #   lista de fontes para o qmake
-│   ├── python.pri          #   bindings Python (qmake)
+│   ├── sourcefiles.pri     #   lista de fontes do qmake legado
+│   ├── python.pri          #   bindings Python (qmake legado)
 │   └── src/                #   código-fonte (ver seção 3)
 ├── scidavis/               # Executável: main.cpp, ícones, traduções, .desktop, scidavisrc.py
 │   ├── src/main.cpp        #   ponto de entrada
@@ -60,7 +60,11 @@ scidavis/
 │   └── translations/       #   arquivos .ts do Qt Linguist
 ├── fitPlugins/             # Exemplos de plugins de ajuste (bibliotecas carregadas em tempo de execução)
 ├── test/                   # Testes unitários (GoogleTest) e projetos de exemplo
-├── 3rdparty/               # Submódulos git: qwt5-qt5, qwtplot3d, liborigin, minigzip
+├── 3rdparty/               # Bibliotecas externas
+│   ├── qwt5/               #   Qwt 5.2 portada para Qt 6 (código incluído no repositório)
+│   ├── qwtplot3d/          #   gráficos 3D (submódulo git)
+│   ├── liborigin/          #   leitura de projetos do Origin (submódulo git)
+│   └── minigzip/           #   compressão de arquivos .sciprj.gz
 ├── cmake/                  # Módulos CMake (FindSIP, FindPyQt, Windeployqt)
 ├── manual/                 # Manual em LaTeX
 ├── doc/                    # Extras de documentação
@@ -79,7 +83,7 @@ scidavis/
 ## 3. Organização do código-fonte (`libscidavis/src`)
 
 Os arquivos estão agrupados por responsabilidade. **Todas as pastas abaixo estão
-no include path** (CMake e qmake), então os `#include` usam apenas o nome do
+no include path** do CMake, então os `#include` usam apenas o nome do
 arquivo — ex.: `#include "Graph.h"` — independentemente da pasta.
 
 ```
@@ -143,7 +147,7 @@ libscidavis/src/
 |---|---|
 | `ScriptingEnv.*`, `Script.*` | Interface abstrata de linguagem de script. |
 | `MuParserScripting.*`, `MuParserScript.*` | Avaliador de fórmulas muParser; tabela de funções embutidas (`math_functions[]`) e funções `col()`, `cell()` etc. |
-| `PythonScripting.*`, `PythonScript.*` | Interpretador Python embutido (opcional, `-DSCRIPTING_PYTHON=ON`). |
+| `PythonScripting.*`, `PythonScript.*` | Interpretador Python embutido (opcional; ainda não portado para Qt 6, ver seção 6). |
 | `scidavis.sip`, `project.py`, `pyproject.toml` | Definição dos bindings Python gerados pelo SIP. |
 | `MyParser.*` | Avaliador muParser simples usado em diálogos (ex.: limites de função). |
 | `ScriptEdit.*` | Editor de texto usado em notas e no "Set Column Values". |
@@ -263,15 +267,26 @@ Pontos importantes:
 
 ## 6. Compilando e testando
 
-Detalhes por plataforma em [INSTALL.md](INSTALL.md). Resumo para Linux (Debian/Ubuntu):
+Requisitos: **Qt 6.8 LTS** (módulos Core, Gui, Widgets, Svg, PrintSupport, Xml,
+OpenGL, OpenGLWidgets e LinguistTools), compilador com **C++20** (GCC 11+, Clang 14+,
+MSVC 2022), CMake 3.16+, GSL, muParser e zlib. A Qwt 5 e a QwtPlot3D são compiladas
+junto com o projeto (não use os pacotes `libqwt*` da distribuição, que são para Qt 5).
+
+Exemplo para Linux (Debian/Ubuntu/Pop!_OS). O Qt 6 das distribuições costuma ser
+mais antigo que o 6.8, então ele é instalado em `~/Qt` com o
+[aqtinstall](https://github.com/miurahr/aqtinstall), sem precisar de `sudo`:
 
 ```bash
-sudo apt install qtbase5-dev qttools5-dev libqt5svg5-dev libqt5opengl5-dev \
-                 libmuparser-dev libgsl-dev libgtest-dev
-git submodule update --init --recursive      # qwt5-qt5, qwtplot3d, liborigin
+sudo apt install build-essential cmake ninja-build libgl1-mesa-dev libglu1-mesa-dev \
+                 libxkbcommon-dev libxcb-cursor0 libmuparser-dev libgsl-dev zlib1g-dev libgtest-dev
+pip install --user aqtinstall
+python3 -m aqt install-qt linux desktop 6.8.3 linux_gcc_64 -O ~/Qt
 
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
-      -DSEARCH_FOR_UPDATES=OFF -DDOWNLOAD_LINKS=OFF   # opcionais: -DSCRIPTING_PYTHON=ON -DORIGIN_IMPORT=ON
+git submodule update --init --recursive      # qwtplot3d, liborigin
+
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_PREFIX_PATH=$HOME/Qt/6.8.3/gcc_64 \
+      -DSEARCH_FOR_UPDATES=OFF -DDOWNLOAD_LINKS=OFF   # opcional: -DORIGIN_IMPORT=ON
 cmake --build build -j$(nproc)
 ./build/scidavis/scidavis
 ```
@@ -283,9 +298,21 @@ cmake -S . -B build -DBUILD_TESTS=ON && cmake --build build -j$(nproc)
 cd build && ctest --output-on-failure        # em servidor sem tela: xvfb-run ctest ...
 ```
 
-Opções do CMake: `SCRIPTING_MUPARSER` (ON), `SCRIPTING_PYTHON` (OFF),
-`ORIGIN_IMPORT` (OFF), `BUILD_TESTS` (OFF), `SEARCH_FOR_UPDATES` (ON),
-`DOWNLOAD_LINKS` (ON).
+Opções do CMake: `SCRIPTING_MUPARSER` (ON), `ORIGIN_IMPORT` (OFF), `BUILD_TESTS` (OFF),
+`SEARCH_FOR_UPDATES` (ON), `DOWNLOAD_LINKS` (ON). `SCRIPTING_PYTHON` ainda **não** foi
+portado para Qt 6/PyQt6 e gera erro se ativado.
+
+### Notas da migração para Qt 6
+
+- **Fontes em projetos**: o Qt 6 mudou a escala de peso das fontes (negrito 75 → 700).
+  Os arquivos `.sciprj` e as configurações continuam na escala antiga, para manter
+  compatibilidade; a conversão fica em `SciDAVis::fontWeightToLegacy()` /
+  `fontWeightFromLegacy()` (`app/globals.cpp`).
+- **Caixas de mensagem com botões personalizados**: use `SciDAVis::choice()`
+  (`app/globals.cpp`) no lugar das sobrecargas antigas de `QMessageBox`.
+- **Conexões `SIGNAL()`/`SLOT()` em texto** não são verificadas pelo compilador: um sinal
+  removido no Qt 6 só aparece como aviso `No such signal` ao rodar. Em código novo,
+  prefira a sintaxe com ponteiros (`&Classe::sinal`).
 
 ### Scripts auxiliares
 
@@ -295,7 +322,7 @@ Opções do CMake: `SCRIPTING_MUPARSER` (ON), `SCRIPTING_PYTHON` (OFF),
 | `scripts/makeDist.sh` | Gera o tarball de código-fonte (inclui submódulos) |
 | `scripts/update_translations.sh` (`.bat`) | Atualiza os `.ts` preservando traduções existentes |
 | `scripts/pre-commit.py` | Hook de git que aplica `clang-format` (`ln -s ../../scripts/pre-commit.py .git/hooks/pre-commit`) |
-| `scripts/run-coverage.sh`, `scripts/compileTest.sh` | Cobertura de testes e teste de compilação (qmake) |
+| `scripts/run-coverage.sh`, `scripts/compileTest.sh` | Cobertura de testes e teste de compilação (qmake legado, não funcionam com Qt 6) |
 | `packaging/makeMsi.sh`, `packaging/mkMacDist.sh` | Instalador MSI (Windows) e bundle `.app`/`.pkg` (macOS) |
 
 Todos os scripts podem ser chamados de qualquer diretório — eles mudam para a
@@ -306,12 +333,10 @@ raiz do repositório antes de executar.
 ## 7. Como contribuir
 
 - **Adicionando um arquivo novo**: coloque-o na pasta do módulo correspondente e
-  adicione-o **nos dois** sistemas de build: `libscidavis/CMakeLists.txt`
-  (listas `HEADERS`/`SRCS`) e `libscidavis/sourcefiles.pri`. Não é preciso
-  mexer em include paths.
+  adicione-o em `libscidavis/CMakeLists.txt` (listas `HEADERS`/`SRCS`). Não é
+  preciso mexer em include paths.
 - **Nova pasta de módulo**: inclua-a em `target_include_directories` no
-  `libscidavis/CMakeLists.txt`, em `INCLUDEPATH` no `libscidavis/sourcefiles.pri`,
-  `scidavis/scidavis.pro` e `test/test.pro`.
+  `libscidavis/CMakeLists.txt`.
 - **Nova análise**: herde de `Filter` (ou de `Fit` para ajustes) em `analysis/`,
   implemente `calculateOutputData()` (ou as funções-modelo em `fit_gsl.cpp`) e
   crie o diálogo em `dialogs/`.

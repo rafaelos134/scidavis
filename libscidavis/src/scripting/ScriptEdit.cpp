@@ -39,7 +39,6 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QTextStream>
-#include <QTextCodec>
 #include <QTextBlock>
 #include <QKeyEvent>
 
@@ -284,7 +283,7 @@ void ScriptEdit::evaluate()
         codeCursor.mergeBlockFormat(d_fmt_success);
 
     if (res.isValid())
-        if (!res.isNull() && res.canConvert(QVariant::String)) {
+        if (!res.isNull() && res.canConvert(QMetaType(QMetaType::QString))) {
             QString strVal = res.toString();
             strVal.replace("\n", "\n#> ");
             printCursor.insertText("\n");
@@ -340,7 +339,7 @@ QString ScriptEdit::importASCII(const QString &filename)
         return QString();
     }
     QTextStream s(&file);
-    s.setCodec(QTextCodec::codecForName("UTF-8"));
+    s.setEncoding(QStringConverter::Utf8);
     while (!s.atEnd())
         insertPlainText(s.readLine() + "\n");
     file.close();
@@ -381,7 +380,7 @@ QString ScriptEdit::exportASCII(const QString &filename)
         }
 
         QTextStream t(&f);
-        t.setCodec(QTextCodec::codecForName("UTF-8"));
+        t.setEncoding(QStringConverter::Utf8);
         t << toPlainText();
         f.close();
     }

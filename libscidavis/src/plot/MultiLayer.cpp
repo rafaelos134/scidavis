@@ -51,6 +51,7 @@
 #include <qwt_text_label.h>
 
 #include "MultiLayer.h"
+#include "globals.h"
 #include "Plot.h"
 #include "Legend.h"
 #include "SelectionMoveResizer.h"
@@ -130,7 +131,7 @@ MultiLayer::MultiLayer(const QString &label, QWidget *parent, const QString name
     d_main_widget->setLayout(layout);
     layout->addLayout(hbox);
     layout->addWidget(canvas, 1);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     this->setWidget(d_main_widget);
 
@@ -284,10 +285,7 @@ void MultiLayer::resizeLayers(const QSize &size, const QSize &oldSize, bool scal
 void MultiLayer::confirmRemoveLayer()
 {
     if (graphs > 1) {
-        switch (QMessageBox::information(
-                this, tr("Guess best layout?"),
-                tr("Do you want SciDAVis to rearrange the remaining layers?"), tr("&Yes"),
-                tr("&No"), tr("&Cancel"), 0, 2)) {
+        switch (SciDAVis::choice(this, QMessageBox::Information, tr("Guess best layout?"), tr("Do you want SciDAVis to rearrange the remaining layers?"), { tr("&Yes"), tr("&No"), tr("&Cancel") }, 0, 2)) {
         case 0:
             removeLayer();
             arrangeLayers(true, false);

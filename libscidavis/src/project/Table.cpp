@@ -29,6 +29,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "Table.h"
+#include "globals.h"
 #include "core/column/Column.h"
 #include "lib/Interval.h"
 #include "table/TableModel.h"
@@ -41,7 +42,6 @@
 #include <QMessageBox>
 #include <QDateTime>
 #include <QTextStream>
-#include <QTextCodec>
 #include <QClipboard>
 #include <QApplication>
 #include <QPainter>
@@ -472,7 +472,7 @@ bool Table::recalculate(int col, bool only_selected_rows)
                     QApplication::restoreOverrideCursor();
                     return false;
                 }
-                if (ret.canConvert(QVariant::Double))
+                if (ret.canConvert(QMetaType(QMetaType::Double)))
                     results[i - start_row] = ret.toDouble();
                 else
                     results[i - start_row] = NAN;
@@ -490,9 +490,9 @@ bool Table::recalculate(int col, bool only_selected_rows)
                     QApplication::restoreOverrideCursor();
                     return false;
                 }
-                if (ret.type() == QVariant::Double)
+                if (ret.typeId() == QMetaType::Double)
                     results << QLocale().toString(ret.toDouble(), 'g', 14);
-                else if (ret.canConvert(QVariant::String))
+                else if (ret.canConvert(QMetaType(QMetaType::QString)))
                     results << ret.toString();
                 else
                     results << QString();
@@ -549,7 +549,7 @@ QString Table::saveToString(const QString &geometry)
 void Table::saveToDevice(QIODevice *device, const QString &geometry)
 {
     QTextStream stream(device);
-    stream.setCodec(QTextCodec::codecForName("UTF-8"));
+    stream.setEncoding(QStringConverter::Utf8);
 
     // write start tag
     stream << "<table>\n";
@@ -573,7 +573,7 @@ void Table::saveToDevice(QIODevice *device, const QString &geometry)
     if (tmp_file.isOpen()) {
         tmp_file.seek(0);
         QTextStream count(&tmp_file);
-        count.setCodec(QTextCodec::codecForName("UTF-8"));
+        count.setEncoding(QStringConverter::Utf8);
         while (!count.atEnd())
             xml_chars += count.read(1024).length();
     } else
@@ -1040,7 +1040,7 @@ bool Table::exportASCII(const QString &fname, const QString &separator, bool wit
 
     if (withLabels) {
         QStringList header = colNames();
-        QStringList ls = header.filter(QRegExp("\\D"));
+        QStringList ls = header.filter(QRegularExpression("\\D"));
         if (exportSelection) {
             for (i = 1; i < selectedCols; i++) {
                 if (ls.count() > 0)
@@ -1102,10 +1102,8 @@ void Table::customEvent(QEvent *e)
 void Table::closeEvent(QCloseEvent *e)
 {
     if (askOnClose) {
-        switch (QMessageBox::information(this, tr("SciDAVis"),
-                                         tr("Do you want to hide or delete") + "<p><b>'"
-                                                 + objectName() + "'</b> ?",
-                                         tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2)) {
+        switch (SciDAVis::choice(this, QMessageBox::Information, tr("SciDAVis"), tr("Do you want to hide or delete") + "<p><b>'"
+                                                 + objectName() + "'</b> ?", { tr("Delete"), tr("Hide"), tr("Cancel") }, 0, 2)) {
         case 0:
             e->accept();
             if (d_future_table)

@@ -2,61 +2,53 @@ name: CI Tests
 
 on: [pull_request,push]
 
+env:
+  QT_VERSION: '6.8.*'   # current Qt LTS
+
 jobs:
   Ubuntu:
 
-    runs-on: ubuntu-${{ matrix.ubuntu_ver }}
+    runs-on: ubuntu-24.04
 
-    strategy:
-      fail-fast: false
-      matrix:
-        ubuntu_ver: [18.04, 20.04]
-
-    name: ubuntu-${{ matrix.ubuntu_ver }}
+    name: ubuntu-24.04
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: true
 
-      - name: Install prerequisties
+      - name: Install prerequisites
         run: |
-          wget http://download.opensuse.org/repositories/home:hpcoder1/xUbuntu_${{ matrix.ubuntu_ver }}/Release.key
-          sudo apt-key add - < Release.key
-          sudo add-apt-repository -y \
-            'deb http://download.opensuse.org/repositories/home:/hpcoder1/xUbuntu_${{ matrix.ubuntu_ver }}/ /'
-          sudo apt install -y --no-install-recommends \
-            qtbase5-dev \
-            qttools5-dev \
-            libqt5svg5-dev \
-            libqt5opengl5-dev \
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            ninja-build \
+            libgl1-mesa-dev \
+            libglu1-mesa-dev \
+            libxkbcommon-dev \
+            libxcb-cursor0 \
             libmuparser-dev \
             libgsl-dev \
-            libqwt5-qt5-dev \
-            pyqt5-dev \
-            python3-pyqt5 \
             libgtest-dev \
-            python3-numpy \
+            zlib1g-dev \
             xvfb
 
-      - name: Build and Install GTest
-        if: matrix.ubuntu_ver == 18.04
-        run: |
-          mkdir gtest && cd gtest
-          cmake /usr/src/googletest
-          make -j$(nproc)
-          sudo make install
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          cache: true
 
       - name: Configuring
         run: |
-          mkdir build && cd build
-          cmake .. -DSEARCH_FOR_UPDATES=OFF -DDOWNLOAD_LINKS=OFF -DORIGIN_IMPORT=ON -DSCRIPTING_PYTHON=ON \
-            -DBUILD_TESTS=ON
+          cmake -S . -B build -G Ninja -DSEARCH_FOR_UPDATES=OFF -DDOWNLOAD_LINKS=OFF \
+            -DORIGIN_IMPORT=ON -DBUILD_TESTS=ON
 
       - name: Building
         run: |
-          xvfb-run make -j$(nproc) -C build
+          cmake --build build -j$(nproc)
 
       - name: Testing
         run: |
@@ -67,55 +59,29 @@ jobs:
 
     runs-on: windows-latest
 
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - qt_ver: 5.12.10
-            python: OFF
-          - qt_ver: 5.15.2
-            python: ON
-
-    name: MSVC_Qt_${{ matrix.qt_ver }}
+    name: MSVC
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: true
 
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v1
-        with:
-          path: ../Qt
-          key: ${{ runner.os }}-${{ matrix.qt_ver }}-QtCache
-
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v4
         with:
-          version: ${{ matrix.qt_ver }}
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          version: ${{ env.QT_VERSION }}
+          cache: true
 
-      - uses: lukka/run-vcpkg@v6
-        with:
-          vcpkgGitCommitId: 50ea8c0ab7aca3bb9245bba7fc877ad2f2a4464c
-          setupOnly: true
       - name: Install VCPKG packages
         run: |
-          Add-Content ${{ env.VCPKG_ROOT }}\triplets\x64-windows.cmake "set(VCPKG_BUILD_TYPE release)" 
-          ${{ env.VCPKG_ROOT }}\vcpkg install zlib gsl muparser opengl gl2ps gtest --triplet x64-windows
-
-      - name: Install Python packages
-        if: ${{ matrix.qt_ver == '5.15.2' }}
-        run: |
-         pip install sip==5.5.0 pyqt5==5.15.2  PyQt5-sip==12.8.1 numpy
+          vcpkg install zlib gsl muparser gl2ps gtest --triplet x64-windows
 
       - name: Configuring
         run: |
-          mkdir build; cd build
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_ROOT }}\scripts\buildsystems\vcpkg.cmake `
-            -DORIGIN_IMPORT=ON -DSCRIPTING_PYTHON=${{ matrix.python }} -DBUILD_TESTS=ON
+          cmake -S . -B build `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" `
+            -DORIGIN_IMPORT=ON -DBUILD_TESTS=ON
 
       - name: Building
         run: |
@@ -138,35 +104,34 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: true
 
       - name: Install MinGW-w64 packages
         uses: msys2/setup-msys2@v2
         with:
+          msystem: UCRT64
           update: true
           install: >-
-            make
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-qt5
-            mingw-w64-x86_64-muparser
-            mingw-w64-x86_64-gsl
-            mingw-w64-x86_64-gl2ps
-            mingw-w64-x86_64-gtest
-            mingw-w64-x86_64-sip4
-            mingw-w64-x86_64-python-pyqt5
-            mingw-w64-x86_64-python-numpy
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-qt6-base
+            mingw-w64-ucrt-x86_64-qt6-svg
+            mingw-w64-ucrt-x86_64-qt6-tools
+            mingw-w64-ucrt-x86_64-muparser
+            mingw-w64-ucrt-x86_64-gsl
+            mingw-w64-ucrt-x86_64-gl2ps
+            mingw-w64-ucrt-x86_64-gtest
 
       - name: Configuring
         run: |
-          mkdir build && cd build
-          cmake .. -G"MSYS Makefiles" -DORIGIN_IMPORT=ON -DSCRIPTING_PYTHON=ON -DBUILD_TESTS=ON
+          cmake -S . -B build -G Ninja -DORIGIN_IMPORT=ON -DBUILD_TESTS=ON
 
       - name: Building
         run: |
-          make -C build -j$(nproc)
+          cmake --build build -j$(nproc)
 
       - name: Testing
         run: |
@@ -181,36 +146,27 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: true
 
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v1
-        with:
-          path: ../Qt
-          key: ${{ runner.os }}-QtCache
-
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v4
         with:
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          version: ${{ env.QT_VERSION }}
+          cache: true
 
-      - name: Install prerequisties
+      - name: Install prerequisites
         run: |
-         brew install muparser gsl gl2ps googletest
-         pip install pyqt5 numpy sip PyQt-builder
+          brew install muparser gsl gl2ps googletest
 
       - name: Configuring
         run: |
-          mkdir build && cd build
-          cmake .. -DORIGIN_IMPORT=ON -DSCRIPTING_PYTHON=ON -DPython3_ROOT_DIR=$pythonLocation \
-            -DBUILD_TESTS=ON
+          cmake -S . -B build -DORIGIN_IMPORT=ON -DBUILD_TESTS=ON
 
       - name: Building
         run: |
-          make -j$(sysctl -n hw.logicalcpu) -C build
+          cmake --build build -j$(sysctl -n hw.logicalcpu)
 
       - name: Testing
         run: |

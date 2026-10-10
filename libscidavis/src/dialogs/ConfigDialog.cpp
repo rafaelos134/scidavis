@@ -48,7 +48,7 @@
 #include <QSpinBox>
 #include <QRadioButton>
 #include <QStyleFactory>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QMessageBox>
 #include <QTranslator>
 #include <QApplication>
@@ -112,7 +112,7 @@ ConfigDialog::ConfigDialog(QWidget *parent, Qt::WindowFlags fl) : QDialog(parent
 
     QHBoxLayout *topLayout = new QHBoxLayout();
     topLayout->setSpacing(5);
-    topLayout->setMargin(5);
+    topLayout->setContentsMargins(5, 5, 5, 5);
     topLayout->addWidget(itemsList);
     topLayout->addLayout(rightLayout);
 
@@ -1097,7 +1097,7 @@ void ConfigDialog::apply()
     sep.replace(tr("SPACE"), " ");
     sep.replace("\\s", " ");
 
-    if (sep.contains(QRegExp("[0-9.eE+-]")) != 0) {
+    if (sep.contains(QRegularExpression("[0-9.eE+-]")) != 0) {
         QMessageBox::warning(
                 0, tr("Import options error"),
                 tr("The separator must not contain the following characters: 0-9eE.+-"));

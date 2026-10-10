@@ -30,6 +30,7 @@
 #define NOMINMAX
 #endif
 #include "Graph3D.h"
+#include "globals.h"
 #include "Bar.h"
 #include "Cone3D.h"
 #include "MyParser.h"
@@ -789,7 +790,7 @@ void Graph3D::setNumbersFont(const QFont &font)
 
 void Graph3D::setNumbersFont(const QStringList &lst)
 {
-    QFont fnt = QFont(lst[1], lst[2].toInt(), lst[3].toInt(), lst[4].toInt());
+    QFont fnt = QFont(lst[1], lst[2].toInt(), SciDAVis::fontWeightFromLegacy(lst[3].toInt()), lst[4].toInt());
     sp->coordinates()->setNumberFont(fnt);
 }
 
@@ -819,7 +820,7 @@ void Graph3D::setZAxisLabelFont(const QFont &fnt)
 
 void Graph3D::setXAxisLabelFont(const QStringList &lst)
 {
-    QFont fnt = QFont(lst[1], lst[2].toInt(), lst[3].toInt(), lst[4].toInt());
+    QFont fnt = QFont(lst[1], lst[2].toInt(), SciDAVis::fontWeightFromLegacy(lst[3].toInt()), lst[4].toInt());
     sp->coordinates()->axes[X1].setLabelFont(fnt);
     sp->coordinates()->axes[X2].setLabelFont(fnt);
     sp->coordinates()->axes[X3].setLabelFont(fnt);
@@ -828,7 +829,7 @@ void Graph3D::setXAxisLabelFont(const QStringList &lst)
 
 void Graph3D::setYAxisLabelFont(const QStringList &lst)
 {
-    QFont fnt = QFont(lst[1], lst[2].toInt(), lst[3].toInt(), lst[4].toInt());
+    QFont fnt = QFont(lst[1], lst[2].toInt(), SciDAVis::fontWeightFromLegacy(lst[3].toInt()), lst[4].toInt());
     sp->coordinates()->axes[Y1].setLabelFont(fnt);
     sp->coordinates()->axes[Y2].setLabelFont(fnt);
     sp->coordinates()->axes[Y3].setLabelFont(fnt);
@@ -837,7 +838,7 @@ void Graph3D::setYAxisLabelFont(const QStringList &lst)
 
 void Graph3D::setZAxisLabelFont(const QStringList &lst)
 {
-    QFont fnt = QFont(lst[1], lst[2].toInt(), lst[3].toInt(), lst[4].toInt());
+    QFont fnt = QFont(lst[1], lst[2].toInt(), SciDAVis::fontWeightFromLegacy(lst[3].toInt()), lst[4].toInt());
     sp->coordinates()->axes[Z1].setLabelFont(fnt);
     sp->coordinates()->axes[Z2].setLabelFont(fnt);
     sp->coordinates()->axes[Z3].setLabelFont(fnt);
@@ -2430,7 +2431,7 @@ QString Graph3D::saveToString(const QString &geometry)
     s += COLORNAME(titleCol) + "\t";
     s += titleFnt.family() + "\t";
     s += QString::number(titleFnt.pointSize()) + "\t";
-    s += QString::number(titleFnt.weight()) + "\t";
+    s += QString::number(SciDAVis::fontWeightToLegacy(titleFnt.weight())) + "\t";
     s += QString::number(titleFnt.italic()) + "\n";
 
     s += "colors\t";
@@ -2464,28 +2465,28 @@ QString Graph3D::saveToString(const QString &geometry)
     QFont fnt = sp->coordinates()->axes[X1].numberFont();
     s += fnt.family() + "\t";
     s += QString::number(fnt.pointSize()) + "\t";
-    s += QString::number(fnt.weight()) + "\t";
+    s += QString::number(SciDAVis::fontWeightToLegacy(fnt.weight())) + "\t";
     s += QString::number(fnt.italic()) + "\n";
 
     s += "xAxisLabelFont\t";
     fnt = sp->coordinates()->axes[X1].labelFont();
     s += fnt.family() + "\t";
     s += QString::number(fnt.pointSize()) + "\t";
-    s += QString::number(fnt.weight()) + "\t";
+    s += QString::number(SciDAVis::fontWeightToLegacy(fnt.weight())) + "\t";
     s += QString::number(fnt.italic()) + "\n";
 
     s += "yAxisLabelFont\t";
     fnt = sp->coordinates()->axes[Y1].labelFont();
     s += fnt.family() + "\t";
     s += QString::number(fnt.pointSize()) + "\t";
-    s += QString::number(fnt.weight()) + "\t";
+    s += QString::number(SciDAVis::fontWeightToLegacy(fnt.weight())) + "\t";
     s += QString::number(fnt.italic()) + "\n";
 
     s += "zAxisLabelFont\t";
     fnt = sp->coordinates()->axes[Z1].labelFont();
     s += fnt.family() + "\t";
     s += QString::number(fnt.pointSize()) + "\t";
-    s += QString::number(fnt.weight()) + "\t";
+    s += QString::number(SciDAVis::fontWeightToLegacy(fnt.weight())) + "\t";
     s += QString::number(fnt.italic()) + "\n";
 
     s += "rotation\t";
@@ -2547,7 +2548,7 @@ void Graph3D::setTitle(const QStringList &lst)
     titleCol = QColor(COLORVALUE(lst[2]));
     sp->setTitleColor(Qt2GL(titleCol));
 
-    titleFnt = QFont(lst[3], lst[4].toInt(), lst[5].toInt(), lst[6].toInt());
+    titleFnt = QFont(lst[3], lst[4].toInt(), SciDAVis::fontWeightFromLegacy(lst[5].toInt()), lst[6].toInt());
     sp->setTitleFont(titleFnt.family(), titleFnt.pointSize(), titleFnt.weight(), titleFnt.italic());
 }
 

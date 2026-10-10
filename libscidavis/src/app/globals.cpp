@@ -33,6 +33,10 @@
 #include "globals.h"
 #include "qwt_global.h"
 #include <QMessageBox>
+#include <QRegularExpression>
+#include <QPushButton>
+#include <QFont>
+#include <climits>
 #include <QIcon>
 #include <QObject>
 #include <QMetaObject>
@@ -129,10 +133,56 @@ QString SciDAVis::extraVersion()
     return QString(extra_version);
 }
 
+// Same correspondence Qt itself uses between the Qt 5 and Qt 6 (OpenType) weight scales.
+static const int fontWeightMap[][2] = {
+    { 0, QFont::Thin },      { 12, QFont::ExtraLight }, { 25, QFont::Light },
+    { 50, QFont::Normal },   { 57, QFont::Medium },     { 63, QFont::DemiBold },
+    { 75, QFont::Bold },     { 81, QFont::ExtraBold },  { 87, QFont::Black },
+};
+
+static int closestFontWeight(int weight, int from, int to)
+{
+    int result = fontWeightMap[0][to], distance = INT_MAX;
+    for (const auto &entry : fontWeightMap) {
+        if (qAbs(weight - entry[from]) < distance) {
+            distance = qAbs(weight - entry[from]);
+            result = entry[to];
+        }
+    }
+    return result;
+}
+
+int SciDAVis::fontWeightToLegacy(int weight)
+{
+    return closestFontWeight(weight, 1, 0);
+}
+
+int SciDAVis::fontWeightFromLegacy(int legacyWeight)
+{
+    return closestFontWeight(legacyWeight, 0, 1);
+}
+
+int SciDAVis::choice(QWidget *parent, QMessageBox::Icon icon, const QString &title,
+                     const QString &text, const QStringList &buttons, int defaultButton,
+                     int escapeButton)
+{
+    QMessageBox box(icon, title, text, QMessageBox::NoButton, parent);
+    QList<QAbstractButton *> added;
+    for (const QString &label : buttons)
+        added << (label.isEmpty() ? nullptr : box.addButton(label, QMessageBox::ActionRole));
+    if (defaultButton >= 0 && defaultButton < added.size() && added[defaultButton])
+        box.setDefaultButton(qobject_cast<QPushButton *>(added[defaultButton]));
+    if (escapeButton >= 0 && escapeButton < added.size() && added[escapeButton])
+        box.setEscapeButton(added[escapeButton]);
+    box.exec();
+    QAbstractButton *clicked = box.clickedButton();
+    return clicked ? added.indexOf(clicked) : -1;
+}
+
 void SciDAVis::about()
 {
     QString text = SciDAVis::copyright_string;
-    text.replace(QRegExp("\\[1\\]"), "<sup>1</sup>");
+    text.replace(QRegularExpression("\\[1\\]"), "<sup>1</sup>");
     text.replace("é", "&eacute;");
     text.replace("á", "&aacute;");
     text.replace("ö", "&ouml;");

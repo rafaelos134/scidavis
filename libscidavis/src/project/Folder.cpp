@@ -291,7 +291,7 @@ void FolderListView::startDrag(Qt::DropActions supportedActions)
 
 void FolderListView::dropEvent(QDropEvent *e)
 {
-    QTreeWidgetItem *dest = itemAt(e->pos());
+    QTreeWidgetItem *dest = itemAt(e->position().toPoint());
     if (dest && dest->type() == FolderListItem::FolderType) {
         if (dropIndicatorPosition() != QAbstractItemView::OnItem) {
             e->ignore();

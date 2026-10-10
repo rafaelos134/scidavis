@@ -445,12 +445,12 @@ void Table::pasteIntoSelection(const bool isTransposed)
     if (mimeData->hasText()) {
         QString input_str = clipboard->text().trimmed();
         QList<QStringList> cell_texts;
-        QStringList input_rows(input_str.split(QRegExp("\\n|\\r\\n|\\r")));
+        QStringList input_rows(input_str.split(QRegularExpression("\\n|\\r\\n|\\r")));
         for (int i = 0; i < input_rows.count(); i++) {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-            auto cells = input_rows.at(i).trimmed().split(QRegExp("( +|\\s)"), Qt::KeepEmptyParts);
+            auto cells = input_rows.at(i).trimmed().split(QRegularExpression("( +|\\s)"), Qt::KeepEmptyParts);
 #else
-            auto cells = input_rows.at(i).trimmed().split(QRegExp("( +|\\s)"), QString::KeepEmptyParts);
+            auto cells = input_rows.at(i).trimmed().split(QRegularExpression("( +|\\s)"), QString::KeepEmptyParts);
 #endif
             if (isTransposed) {
                 for (; cells.count() > cell_texts.count();)

@@ -215,7 +215,7 @@ void FitDialog::initFitPage()
     fitPage->setLayout(vbox1);
     tw->addWidget(fitPage);
 
-    connect(boxCurve, SIGNAL(activated(const QString &)), this,
+    connect(boxCurve, SIGNAL(textActivated(const QString &)), this,
             SLOT(activateCurve(const QString &)));
     connect(buttonOk, SIGNAL(clicked()), this, SLOT(accept()));
     connect(buttonCancel1, SIGNAL(clicked()), this, SLOT(close()));
@@ -544,7 +544,7 @@ void FitDialog::saveUserFunction()
                               tr("Please enter a function name!"));
         boxName->setFocus();
         return;
-    } else if (boxParam->text().remove(QRegExp("[,;\\s]")).isEmpty()) {
+    } else if (boxParam->text().remove(QRegularExpression("[,;\\s]")).isEmpty()) {
         QMessageBox::critical(this, tr("Input function error"),
                               tr("Please enter at least one parameter name!"));
         boxParam->setFocus();
@@ -630,9 +630,9 @@ void FitDialog::showFitPage()
 
     QString par = boxParam->text().simplified();
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    QStringList paramList = par.split(QRegExp("[,;]+[\\s]*"), Qt::SkipEmptyParts);
+    QStringList paramList = par.split(QRegularExpression("[,;]+[\\s]*"), Qt::SkipEmptyParts);
 #else
-    QStringList paramList = par.split(QRegExp("[,;]+[\\s]*"), QString::SkipEmptyParts);
+    QStringList paramList = par.split(QRegularExpression("[,;]+[\\s]*"), QString::SkipEmptyParts);
 #endif
     int parameters = paramList.count();
     boxParams->setRowCount(parameters);

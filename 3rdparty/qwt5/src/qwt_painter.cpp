@@ -606,7 +606,7 @@ void QwtPainter::drawFocusRect(QPainter *painter, QWidget *widget,
             rect, widget->colorGroup());
 #else
         QStyleOptionFocusRect opt;
-        opt.init(widget);
+        opt.initFrom(widget);
         opt.rect = rect;
         opt.state |= QStyle::State_HasFocus;
 

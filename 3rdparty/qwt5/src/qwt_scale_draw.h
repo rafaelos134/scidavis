@@ -11,6 +11,7 @@
 #define QWT_SCALE_DRAW_H
 
 #include <qpoint.h>
+#include <qtransform.h>
 #include "qwt_global.h"
 #include "qwt_abstract_scale_draw.h"
 

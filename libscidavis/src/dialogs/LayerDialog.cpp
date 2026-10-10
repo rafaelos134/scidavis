@@ -27,6 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "LayerDialog.h"
+#include "globals.h"
 #include "ApplicationWindow.h"
 
 #include <QLayout>
@@ -204,10 +205,8 @@ void LayerDialog::update()
     int old_graphs = multi_layer->layers();
     int dn = multi_layer->layers() - graphs;
     if (dn > 0
-        && QMessageBox::question(0, tr("Delete Layers?"),
-                                 tr("You are about to delete %1 existing layers.").arg(dn) + "\n"
-                                         + tr("Are you sure you want to continue this operation?"),
-                                 tr("&Continue"), tr("&Cancel"), QString(), 0, 1))
+        && SciDAVis::choice(0, QMessageBox::Question, tr("Delete Layers?"), tr("You are about to delete %1 existing layers.").arg(dn) + "\n"
+                                         + tr("Are you sure you want to continue this operation?"), { tr("&Continue"), tr("&Cancel") }, 0, 1))
         return;
 
     multi_layer->setLayersNumber(graphs);

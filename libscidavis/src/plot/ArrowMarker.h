@@ -112,7 +112,13 @@ public:
     double length();
 
     //! Returns the bounding rectangle in paint coordinates.
-    QRect rect() const { return QRect(startPoint(), endPoint()).normalized(); };
+    QRect rect() const
+    {
+        // not QRect::normalized(): since Qt 6 it shrinks inverted rectangles by one pixel
+        const QPoint s = startPoint(), e = endPoint();
+        return QRect(QPoint(qMin(s.x(), e.x()), qMin(s.y(), e.y())),
+                     QPoint(qMax(s.x(), e.x()), qMax(s.y(), e.y())));
+    };
 
     //! Returns the bounding rectangle in plot coordinates.
     QwtDoubleRect boundingRect() const;

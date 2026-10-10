@@ -34,7 +34,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QCloseEvent>
-#include <QTextCodec>
+#include <QStringConverter>
 
 OpenProjectDialog::OpenProjectDialog(QWidget *parent, bool extended, Qt::WindowFlags flags)
     : ExtensibleFileDialog(parent, extended, flags)
@@ -74,8 +74,8 @@ OpenProjectDialog::OpenProjectDialog(QWidget *parent, bool extended, Qt::WindowF
     QHBoxLayout *codec_layout = new QHBoxLayout();
     codec_layout->addWidget(new QLabel(tr("Codepage")));
     d_open_codec = new QComboBox();
-    for (const int id : QTextCodec::availableMibs())
-        d_open_codec->addItem(QString::fromLocal8Bit(QTextCodec::codecForMib(id)->name()), id);
+    for (const QString &name : QStringConverter::availableCodecs())
+        d_open_codec->addItem(name);
     codec_layout->addWidget(d_open_codec);
     codec_layout->setEnabled(false);
     advanced_layout->addLayout(codec_layout);
@@ -121,22 +121,17 @@ void OpenProjectDialog::closeEvent(QCloseEvent *e)
 
 QString OpenProjectDialog::codec() const
 {
-    return QString::fromLocal8Bit(
-            QTextCodec::codecForMib(d_open_codec->currentData().toInt())->name());
+    return d_open_codec->currentText();
 }
 
 bool OpenProjectDialog::setCodec(const QString &codec)
 {
     if ("" == codec)
         return false;
-    for (const int id : QTextCodec::availableMibs())
-        if (codec == QString::fromLocal8Bit(QTextCodec::codecForMib(id)->name())) {
-            // search data only if codec matches
-            int ind = d_open_codec->findData(id);
-            if (-1 != ind) {
-                d_open_codec->setCurrentIndex(ind);
-                return true;
-            }
-        }
+    int ind = d_open_codec->findText(codec, Qt::MatchFixedString);
+    if (-1 != ind) {
+        d_open_codec->setCurrentIndex(ind);
+        return true;
+    }
     return false;
 }

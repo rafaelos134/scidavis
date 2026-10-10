@@ -39,7 +39,7 @@
 #include "Folder.h"
 #include <math.h>
 #include <QtCore/QByteArray>
-#include <QtCore/QRegExp>
+#include <QRegularExpression>
 
 /**
  * \class MuParserScript
@@ -490,9 +490,10 @@ Column *MuParserScript::resolveColumnPath(const QString &path)
  */
 bool MuParserScript::translateLegacyFunctions(QString &input)
 {
-    QRegExp legacyFunction("(\\W||^)(col|tablecol|cell)\\s*\\(");
+    QRegularExpression legacyFunctionRx("(\\W||^)(col|tablecol|cell)\\s*\\(");
 
-    int functionStart = legacyFunction.indexIn(input, 0);
+    QRegularExpressionMatch legacyFunction = legacyFunctionRx.match(input, 0);
+    int functionStart = legacyFunction.hasMatch() ? legacyFunction.capturedStart() : -1;
     while (functionStart != -1) {
         QStringList arguments;
         int functionEnd = functionStart; // initialization is a failsafe
@@ -500,7 +501,7 @@ bool MuParserScript::translateLegacyFunctions(QString &input)
 
         // parse arguments of function
         QString currentArgument;
-        for (int i = functionStart + legacyFunction.matchedLength(), parenthesisLevel = 1;
+        for (int i = functionStart + legacyFunction.capturedLength(), parenthesisLevel = 1;
              parenthesisLevel > 0 && i < input.size(); i++) {
             switch (input.at(i).toLatin1()) {
             case '"':
@@ -544,7 +545,7 @@ bool MuParserScript::translateLegacyFunctions(QString &input)
 
         // select replacement function call
         Table *table = qobject_cast<Table *>(Context);
-        if (legacyFunction.cap(2) == "col") {
+        if (legacyFunction.captured(2) == "col") {
             QString columnArgument;
             bool numericColumn = false;
             if (arguments.at(0).startsWith("\"")) {
@@ -576,7 +577,7 @@ bool MuParserScript::translateLegacyFunctions(QString &input)
             } else
                 replacement =
                         QString("column") + (numericColumn ? "_" : "") + "(" + columnArgument + ")";
-        } else if (legacyFunction.cap(2) == "tablecol") {
+        } else if (legacyFunction.captured(2) == "tablecol") {
             // assert number of arguments == 2
             if (arguments.size() != 2) {
                 emit_error(tr("tablecol: wrong number of arguments (need 2, got %1)")
@@ -633,14 +634,15 @@ bool MuParserScript::translateLegacyFunctions(QString &input)
         }
 
         // do replacement
-        if (legacyFunction.cap(1).isEmpty())
+        if (legacyFunction.captured(1).isEmpty())
             // matched with ^, not \W (lookbehind assertion would be darn handy...)
             input.replace(functionStart, functionEnd - functionStart + 1, replacement);
         else
             // need to adjust for the additional matched character
             input.replace(functionStart + 1, functionEnd - functionStart, replacement);
         // search for next match, starting at the end of the replaced text
-        functionStart = legacyFunction.indexIn(input, functionStart + replacement.length());
+        legacyFunction = legacyFunctionRx.match(input, functionStart + replacement.length());
+        functionStart = legacyFunction.hasMatch() ? legacyFunction.capturedStart() : -1;
     } // while (functionStart != -1)
     return true;
 }
@@ -682,7 +684,7 @@ bool MuParserScript::compile(bool asFunction)
         intermediate.remove(commentStart, intermediate.size() - commentStart);
 
     // simplify statement separators
-    intermediate.replace(QRegExp("([;\\n]\\s*)+"), ", ");
+    intermediate.replace(QRegularExpression("([;\\n]\\s*)+"), ", ");
 
     // recursively translate legacy functions col(), tablecol() and cell()
     if (Context && Context->inherits("Table"))

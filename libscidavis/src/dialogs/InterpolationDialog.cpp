@@ -95,7 +95,7 @@ InterpolationDialog::InterpolationDialog(QWidget *parent, Qt::WindowFlags fl) : 
     hb->addWidget(gb1);
     hb->addLayout(vl);
 
-    connect(boxName, SIGNAL(activated(const QString &)), this,
+    connect(boxName, SIGNAL(textActivated(const QString &)), this,
             SLOT(activateCurve(const QString &)));
     connect(buttonFit, SIGNAL(clicked()), this, SLOT(interpolate()));
     connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));

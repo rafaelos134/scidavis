@@ -14,7 +14,7 @@ jobs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -34,37 +34,25 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: true
 
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v1
-        with:
-          path: ../Qt
-          key: ${{ runner.os }}-QtCache
-
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v4
         with:
-          version: 5.15.2
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          version: '6.8.*'   # current Qt LTS
+          cache: true
 
-      - uses: lukka/run-vcpkg@v6
-        with:
-          vcpkgGitCommitId: 50ea8c0ab7aca3bb9245bba7fc877ad2f2a4464c
-          setupOnly: true
       - name: Install VCPKG packages
         run: |
-          Add-Content ${{ env.VCPKG_ROOT }}\triplets\x64-windows.cmake "set(VCPKG_BUILD_TYPE release)"
-          ${{ env.VCPKG_ROOT }}\vcpkg install zlib gsl muparser opengl gl2ps gtest --triplet x64-windows
+          vcpkg install zlib gsl muparser gl2ps gtest --triplet x64-windows
 
       - name: Configuring
         run: |
           mkdir build; cd build
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_ROOT }}\scripts\buildsystems\vcpkg.cmake `
-            -DORIGIN_IMPORT=ON -DRUNTIME_DIR=${{ env.VCPKG_ROOT }}/installed/x64-windows/bin `
+          cmake .. -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" `
+            -DORIGIN_IMPORT=ON -DRUNTIME_DIR="$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows/bin" `
             -DCPACK_PACKAGE_FILE_NAME=scidavis
 
       - name: Building
@@ -82,7 +70,7 @@ jobs:
         run: |
           $Env:version = (git describe --tags)
           $Env:version
-          echo "::set-output name=version::$Env:version"
+          "version=$Env:version" >> $Env:GITHUB_OUTPUT
           cd build
           cpack -G WIX
           cpack -G NSIS

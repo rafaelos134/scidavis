@@ -32,7 +32,7 @@
 
 #include "core/AbstractSimpleFilter.h"
 #include <QDateTime>
-#include <QRegExp>
+#include <QRegularExpression>
 
 class DateTime2StringFilterSetFormatCmd;
 
@@ -80,10 +80,10 @@ public:
         QString format(d_format);
         format.replace("yyyy", "YYYYyyyyYYYY");
         QString result = input_value.toString(format);
-        result.replace(QRegExp("YYYY(-)?(\\d\\d\\d\\d)YYYY"), "\\1\\2");
-        result.replace(QRegExp("YYYY(-)?(\\d\\d\\d)YYYY"), "\\10\\2");
-        result.replace(QRegExp("YYYY(-)?(\\d\\d)YYYY"), "\\100\\2");
-        result.replace(QRegExp("YYYY(-)?(\\d)YYYY"), "\\1000\\2");
+        result.replace(QRegularExpression("YYYY(-)?(\\d\\d\\d\\d)YYYY"), "\\1\\2");
+        result.replace(QRegularExpression("YYYY(-)?(\\d\\d\\d)YYYY"), "\\10\\2");
+        result.replace(QRegularExpression("YYYY(-)?(\\d\\d)YYYY"), "\\100\\2");
+        result.replace(QRegularExpression("YYYY(-)?(\\d)YYYY"), "\\1000\\2");
         return result;
 #else
         return input_value.toString(d_format);

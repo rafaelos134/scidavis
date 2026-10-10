@@ -18,7 +18,7 @@ foreach(i ${languages})
    list(APPEND TS_FILES "${CMAKE_CURRENT_BINARY_DIR}/translations-copy/scidavis_${i}.ts")
 endforeach()
 
-qt5_create_translation( QM_FILES "${CMAKE_SOURCE_DIR}/libscidavis" ${TS_FILES} )
+qt6_create_translation( QM_FILES "${CMAKE_SOURCE_DIR}/libscidavis" ${TS_FILES} )
 
 #set( MACOSX_BUNDLE_PLIST scidavis/scidavis.app/Contents/Info.plist )
 #set( MACOSX_BUNDLE_ICON scidavis/scidavis.app/Contents/Resources/scidavis.icns )
@@ -31,7 +31,7 @@ add_executable( scidavis
   "${QM_FILES}"
   )
 
-# SciDAVis expects qm files to be in the translations directory. qt5_create_translation puts them somewhere else
+# SciDAVis expects qm files to be in the translations directory. qt6_create_translation puts them somewhere else
 # (a custom target, so updated .qm files are copied even when scidavis itself is not relinked)
 add_custom_target( scidavis_translations ALL
   COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:scidavis>/translations"

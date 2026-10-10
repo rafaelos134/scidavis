@@ -43,11 +43,11 @@ TEST_F(ApplicationWindowTest, arrowMarker)
     auto midx = (oldl + oldr) / 2, midy = (oldb + oldt) / 2;
     {
         // move ending point
-        QMouseEvent mousePress(QEvent::MouseButtonPress, { oldr, oldt }, Qt::LeftButton,
+        QMouseEvent mousePress(QEvent::MouseButtonPress, QPointF{ oldr, oldt }, QPointF{ oldr, oldt }, Qt::LeftButton,
                                Qt::LeftButton, Qt::NoModifier);
-        QMouseEvent mouseMove(QEvent::MouseMove, { oldr + 10, oldt + 10 }, Qt::NoButton,
+        QMouseEvent mouseMove(QEvent::MouseMove, QPointF{ oldr + 10, oldt + 10 }, QPointF{ oldr + 10, oldt + 10 }, Qt::NoButton,
                               Qt::LeftButton, Qt::NoModifier);
-        QMouseEvent mouseRelease(QEvent::MouseButtonRelease, { oldr + 10, oldt + 10 },
+        QMouseEvent mouseRelease(QEvent::MouseButtonRelease, QPointF{ oldr + 10, oldt + 10 }, QPointF{ oldr + 10, oldt + 10 },
                                  Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
         EXPECT_TRUE(arrow.eventFilter(nullptr, &mousePress));
         EXPECT_TRUE(arrow.eventFilter(nullptr, &mouseMove));
@@ -61,11 +61,11 @@ TEST_F(ApplicationWindowTest, arrowMarker)
     }
     {
         // move starting point
-        QMouseEvent mousePress(QEvent::MouseButtonPress, { oldl, oldb }, Qt::LeftButton,
+        QMouseEvent mousePress(QEvent::MouseButtonPress, QPointF{ oldl, oldb }, QPointF{ oldl, oldb }, Qt::LeftButton,
                                Qt::LeftButton, Qt::NoModifier);
-        QMouseEvent mouseMove(QEvent::MouseMove, { oldl - 10, oldb - 10 }, Qt::NoButton,
+        QMouseEvent mouseMove(QEvent::MouseMove, QPointF{ oldl - 10, oldb - 10 }, QPointF{ oldl - 10, oldb - 10 }, Qt::NoButton,
                               Qt::LeftButton, Qt::NoModifier);
-        QMouseEvent mouseRelease(QEvent::MouseButtonRelease, { oldl - 10, oldb - 10 },
+        QMouseEvent mouseRelease(QEvent::MouseButtonRelease, QPointF{ oldl - 10, oldb - 10 }, QPointF{ oldl - 10, oldb - 10 },
                                  Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
         EXPECT_TRUE(arrow.eventFilter(nullptr, &mousePress));
         EXPECT_TRUE(arrow.eventFilter(nullptr, &mouseMove));
@@ -79,11 +79,11 @@ TEST_F(ApplicationWindowTest, arrowMarker)
     }
     {
         // move both
-        QMouseEvent mousePress(QEvent::MouseButtonPress, { midx, midy }, Qt::LeftButton,
+        QMouseEvent mousePress(QEvent::MouseButtonPress, QPointF{ midx, midy }, QPointF{ midx, midy }, Qt::LeftButton,
                                Qt::LeftButton, Qt::NoModifier);
-        QMouseEvent mouseMove(QEvent::MouseMove, { midx - 10, midy - 10 }, Qt::NoButton,
+        QMouseEvent mouseMove(QEvent::MouseMove, QPointF{ midx - 10, midy - 10 }, QPointF{ midx - 10, midy - 10 }, Qt::NoButton,
                               Qt::LeftButton, Qt::NoModifier);
-        QMouseEvent mouseRelease(QEvent::MouseButtonRelease, { midx - 10, midy - 10 },
+        QMouseEvent mouseRelease(QEvent::MouseButtonRelease, QPointF{ midx - 10, midy - 10 }, QPointF{ midx - 10, midy - 10 },
                                  Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
         EXPECT_TRUE(arrow.eventFilter(nullptr, &mousePress));
         EXPECT_TRUE(arrow.eventFilter(nullptr, &mouseMove));
@@ -99,7 +99,7 @@ TEST_F(ApplicationWindowTest, arrowMarker)
     }
     // double clicking should open dialog. Send a return (closing the dialog) on a separate
     // thread
-    QMouseEvent dblClick(QEvent::MouseButtonDblClick, { 0, 0 }, Qt::LeftButton, Qt::LeftButton,
+    QMouseEvent dblClick(QEvent::MouseButtonDblClick, QPointF{ 0, 0 }, QPointF{ 0, 0 }, Qt::LeftButton, Qt::LeftButton,
                          Qt::NoModifier);
     CloseDialog cd;
     EXPECT_TRUE(arrow.eventFilter(nullptr, &dblClick));

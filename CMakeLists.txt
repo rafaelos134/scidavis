@@ -15,7 +15,7 @@ project( scidavis
   LANGUAGES CXX C)
 include(GNUInstallDirs)
 
-set( CMAKE_CXX_STANDARD 17)
+set( CMAKE_CXX_STANDARD 20)
 set( CMAKE_CXX_STANDARD_REQUIRED TRUE )
 set( CMAKE_CXX_EXTENSIONS OFF )
 
@@ -39,7 +39,8 @@ if( CMAKE_GENERATOR STREQUAL "Visual Studio 15 2017" OR
   endif()
 endif()
 
-find_package( Qt5
+# Qt 6.8 is the current LTS release
+find_package( Qt6 6.8
   COMPONENTS
   Core
   Gui
@@ -48,6 +49,7 @@ find_package( Qt5
   PrintSupport
   Xml
   OpenGL
+  OpenGLWidgets
   LinguistTools
   REQUIRED
   )
@@ -86,7 +88,7 @@ option( SEARCH_FOR_UPDATES "Enable Searching for updates" ON )
 option( DOWNLOAD_LINKS "Enable Download links" ON )
 
 if( SEARCH_FOR_UPDATES OR DOWNLOAD_LINKS )
-  find_package( Qt5 COMPONENTS Network REQUIRED )
+  find_package( Qt6 COMPONENTS Network REQUIRED )
 endif()
 
 option( SCRIPTING_MUPARSER "Enable muParser Scripting" ON )
@@ -96,6 +98,11 @@ option( SCRIPTING_PYTHON "Enable Python Scripting" OFF )
 option( BUILD_TESTS "Build tests" OFF )
 
 if( SCRIPTING_PYTHON )
+  # The SIP bindings (libscidavis/src/scripting/scidavis.sip, cmake/FindPyQt.cmake) and the
+  # Python modules (scidavis/scidavisrc.py, scidavisUtil.py) still target PyQt5. They need a
+  # PyQt6 built against the same Qt 6 installation as SciDAVis before this can be enabled again.
+  message( FATAL_ERROR "SCRIPTING_PYTHON is not yet ported to Qt 6 / PyQt6. "
+    "Configure with -DSCRIPTING_PYTHON=OFF." )
   if( MINGW )
     set( Python3_FIND_REGISTRY LAST )
   endif()

@@ -94,7 +94,7 @@ PolynomFitDialog::PolynomFitDialog(QWidget *parent, Qt::WindowFlags fl) : QDialo
 
     connect(buttonFit, SIGNAL(clicked()), this, SLOT(fit()));
     connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
-    connect(boxName, SIGNAL(activated(const QString &)), this,
+    connect(boxName, SIGNAL(textActivated(const QString &)), this,
             SLOT(activateCurve(const QString &)));
 }
 

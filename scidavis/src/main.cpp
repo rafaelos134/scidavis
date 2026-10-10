@@ -159,7 +159,6 @@ struct Application : public QApplication
 int main(int argc, char **argv)
 {
 
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
     QCoreApplication::setOrganizationName("SciDAVis");
     QCoreApplication::setApplicationName("SciDAVis");
 

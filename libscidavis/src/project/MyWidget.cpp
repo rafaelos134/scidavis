@@ -29,6 +29,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "MyWidget.h"
+#include "globals.h"
 #include "Folder.h"
 
 #include <QMessageBox>
@@ -75,10 +76,8 @@ void MyWidget::updateCaption()
 void MyWidget::closeEvent(QCloseEvent *e)
 {
     if (askOnClose) {
-        switch (QMessageBox::information(this, tr("SciDAVis"),
-                                         tr("Do you want to hide or delete") + "<p><b>'"
-                                                 + objectName() + "'</b> ?",
-                                         tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2)) {
+        switch (SciDAVis::choice(this, QMessageBox::Information, tr("SciDAVis"), tr("Do you want to hide or delete") + "<p><b>'"
+                                                 + objectName() + "'</b> ?", { tr("Delete"), tr("Hide"), tr("Cancel") }, 0, 2)) {
         case 0:
             emit closedWindow(this);
             e->accept();

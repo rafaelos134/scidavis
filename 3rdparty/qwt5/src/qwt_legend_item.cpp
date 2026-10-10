@@ -34,7 +34,7 @@ static QSize buttonShift(const QwtLegendItem *w)
         QStyle::PM_ButtonShiftVertical, w);
 #else
     QStyleOption option;
-    option.init(w);
+    option.initFrom(w);
 
     const int ph = w->style()->pixelMetric(
         QStyle::PM_ButtonShiftHorizontal, &option, w);

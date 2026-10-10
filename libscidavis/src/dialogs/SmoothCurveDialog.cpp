@@ -109,7 +109,7 @@ SmoothCurveDialog::SmoothCurveDialog(int method, QWidget *parent, Qt::WindowFlag
 
     connect(btnSmooth, SIGNAL(clicked()), this, SLOT(smooth()));
     connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
-    connect(boxName, SIGNAL(activated(const QString &)), this,
+    connect(boxName, SIGNAL(textActivated(const QString &)), this,
             SLOT(activateCurve(const QString &)));
 }
 

@@ -124,7 +124,7 @@ FFTDialog::FFTDialog(int type, QWidget *parent, Qt::WindowFlags fl) : QDialog(pa
     setFocusProxy(boxName);
 
     // signals and slots connections
-    connect(boxName, SIGNAL(activated(const QString &)), this,
+    connect(boxName, SIGNAL(textActivated(const QString &)), this,
             SLOT(activateCurve(const QString &)));
     connect(buttonOK, SIGNAL(clicked()), this, SLOT(accept()));
     connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));

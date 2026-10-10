@@ -1,5 +1,9 @@
 # SciDAVis - Installation Notes
 
+> **Qt 6 / CMake:** SciDAVis now builds with Qt 6.8 LTS, C++20 and CMake only.
+> See section 6 of [README.md](README.md) for the current build instructions.
+> The notes below (Qt 5, qmake, MXE, MacPorts) are kept for historical reference only.
+
 **Please visit our [homepage](http://scidavis.sourceforge.net) for more information.**
 
 ## Generic requirements

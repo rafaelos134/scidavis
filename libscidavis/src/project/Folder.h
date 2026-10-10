@@ -245,7 +245,7 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *e) override;
     void keyPressEvent(QKeyEvent *e) override;
     void mouseReleaseEvent(QMouseEvent *) override { mousePressed = false; };
-    void enterEvent(QEvent *) override { mousePressed = false; };
+    void enterEvent(QEnterEvent *) override { mousePressed = false; };
 
 signals:
     void dragItems(QList<QTreeWidgetItem *> items);

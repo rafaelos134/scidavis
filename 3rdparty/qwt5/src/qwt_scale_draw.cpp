@@ -22,7 +22,7 @@
 #include <qwmatrix.h>
 #define QwtMatrix QWMatrix
 #else
-#include <qmatrix.h>
+#include <qtransform.h>
 #define QwtMatrix QTransform
 #endif
 

@@ -18,7 +18,7 @@
 #define QwtMatrix QTransform
 #endif
 #include <qpaintdevice.h> 
-#include <qdesktopwidget.h> 
+#include <qscreen.h>
 #include "qwt_math.h"
 #include "qwt_polygon.h"
 #include "qwt_layout_metrics.h"
@@ -71,7 +71,10 @@ QwtMetricsMap::QwtMetricsMap()
 void QwtMetricsMap::setMetrics(const QPaintDevice *layoutDevice, 
     const QPaintDevice *paintDevice)
 {
-    const QSize screenDpi = deviceDpi(QApplication::desktop());
+    const QScreen *screen = QGuiApplication::primaryScreen();
+    const QSize screenDpi = screen
+            ? QSize(qRound(screen->logicalDotsPerInchX()), qRound(screen->logicalDotsPerInchY()))
+            : QSize(96, 96);
     const QSize layoutDpi = deviceDpi(layoutDevice);
     const QSize paintDpi = deviceDpi(paintDevice);
 

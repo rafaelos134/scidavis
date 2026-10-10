@@ -155,7 +155,6 @@
 #include <QUndoStack>
 #include <QTemporaryFile>
 #include <QDebug>
-#include <QTextCodec>
 #include <QScrollBar>
 #include <QMimeData>
 #include <QElapsedTimer>
@@ -2126,7 +2125,7 @@ MultiLayer *ApplicationWindow::multilayerPlot(const QString &caption)
     MultiLayer *ml = new MultiLayer("", &d_workspace, 0);
     ml->setAttribute(Qt::WA_DeleteOnClose);
     QString label = caption;
-    initMultilayerPlot(ml, label.replace(QRegExp("_"), "-"));
+    initMultilayerPlot(ml, label.replace(QRegularExpression("_"), "-"));
     return ml;
 }
 
@@ -3551,15 +3550,15 @@ bool ApplicationWindow::loadProject(const QString &fn)
     }
 
     QTextStream t(file.get());
-    t.setCodec(QTextCodec::codecForName("UTF-8"));
+    t.setEncoding(QStringConverter::Utf8);
     QString s;
     QStringList list;
 
     s = t.readLine();
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    list = s.split(QRegExp("\\s"), Qt::SkipEmptyParts);
+    list = s.split(QRegularExpression("\\s"), Qt::SkipEmptyParts);
 #else
-    list = s.split(QRegExp("\\s"), QString::SkipEmptyParts);
+    list = s.split(QRegularExpression("\\s"), QString::SkipEmptyParts);
 #endif
     if (list.count() < 2 || (list[0] != "SciDAVis" && list[0] != "QtiPlot")) {
         if (QFile::exists(fn + "~")) {
@@ -3568,7 +3567,7 @@ bool ApplicationWindow::loadProject(const QString &fn)
                     tr("The file <b>%1</b> is corrupted, but there exists a backup copy.<br>Do you "
                        "want to open the backup instead?")
                             .arg(fn),
-                    QMessageBox::Yes | QMessageBox::Default, QMessageBox::No | QMessageBox::Escape);
+                    QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
             if (choice == QMessageBox::Yes) {
                 QMessageBox::information(
                         this, tr("Opening backup copy"),
@@ -3971,12 +3970,12 @@ void ApplicationWindow::openTemplate()
             }
             QFile f(fn);
             QTextStream t(&f);
-            t.setCodec(QTextCodec::codecForName("UTF-8"));
+            t.setEncoding(QStringConverter::Utf8);
             f.open(QIODevice::ReadOnly);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-            QStringList l = t.readLine().split(QRegExp("\\s"), Qt::SkipEmptyParts);
+            QStringList l = t.readLine().split(QRegularExpression("\\s"), Qt::SkipEmptyParts);
 #else
-            QStringList l = t.readLine().split(QRegExp("\\s"), QString::SkipEmptyParts);
+            QStringList l = t.readLine().split(QRegularExpression("\\s"), QString::SkipEmptyParts);
 #endif
             QString fileType = l[0];
             if ((fileType != "SciDAVis") && (fileType != "QtiPlot")) {
@@ -4027,7 +4026,7 @@ void ApplicationWindow::openTemplate()
                     w = new MultiLayer("", &d_workspace, 0);
                     w->setAttribute(Qt::WA_DeleteOnClose);
                     QString label = generateUniqueName(tr("Graph"));
-                    initBareMultilayerPlot((MultiLayer *)w, label.replace(QRegExp("_"), "-"));
+                    initBareMultilayerPlot((MultiLayer *)w, label.replace(QRegularExpression("_"), "-"));
                     if (w) {
                         ((MultiLayer *)w)->setCols(cols);
                         ((MultiLayer *)w)->setRows(rows);
@@ -4139,7 +4138,7 @@ void ApplicationWindow::readSettings()
 #endif
     else if (recentProjects.count() == 1) {
         QString s = recentProjects[0];
-        if (s.remove(QRegExp("\\s")).isEmpty())
+        if (s.remove(QRegularExpression("\\s")).isEmpty())
             recentProjects = QStringList();
     }
 #endif
@@ -4173,7 +4172,7 @@ void ApplicationWindow::readSettings()
 
     QStringList applicationFont = settings.value("/Font").toStringList();
     if (applicationFont.size() == 4)
-        appFont = QFont(applicationFont[0], applicationFont[1].toInt(), applicationFont[2].toInt(),
+        appFont = QFont(applicationFont[0], applicationFont[1].toInt(), SciDAVis::fontWeightFromLegacy(applicationFont[2].toInt()),
                         applicationFont[3].toInt());
 
     settings.beginGroup("/Dialogs");
@@ -4253,9 +4252,9 @@ void ApplicationWindow::readSettings()
     d_show_table_comments = settings.value("/DisplayComments", false).toBool();
     QStringList tableFonts = settings.value("/Fonts").toStringList();
     if (tableFonts.size() == 8) {
-        tableTextFont = QFont(tableFonts[0], tableFonts[1].toInt(), tableFonts[2].toInt(),
+        tableTextFont = QFont(tableFonts[0], tableFonts[1].toInt(), SciDAVis::fontWeightFromLegacy(tableFonts[2].toInt()),
                               tableFonts[3].toInt());
-        tableHeaderFont = QFont(tableFonts[4], tableFonts[5].toInt(), tableFonts[6].toInt(),
+        tableHeaderFont = QFont(tableFonts[4], tableFonts[5].toInt(), SciDAVis::fontWeightFromLegacy(tableFonts[6].toInt()),
                                 tableFonts[7].toInt());
     }
 
@@ -4286,13 +4285,13 @@ void ApplicationWindow::readSettings()
 
     QStringList graphFonts = settings.value("/Fonts").toStringList();
     if (graphFonts.size() == 16) {
-        plotAxesFont = QFont(graphFonts[0], graphFonts[1].toInt(), graphFonts[2].toInt(),
+        plotAxesFont = QFont(graphFonts[0], graphFonts[1].toInt(), SciDAVis::fontWeightFromLegacy(graphFonts[2].toInt()),
                              graphFonts[3].toInt());
-        plotNumbersFont = QFont(graphFonts[4], graphFonts[5].toInt(), graphFonts[6].toInt(),
+        plotNumbersFont = QFont(graphFonts[4], graphFonts[5].toInt(), SciDAVis::fontWeightFromLegacy(graphFonts[6].toInt()),
                                 graphFonts[7].toInt());
-        plotLegendFont = QFont(graphFonts[8], graphFonts[9].toInt(), graphFonts[10].toInt(),
+        plotLegendFont = QFont(graphFonts[8], graphFonts[9].toInt(), SciDAVis::fontWeightFromLegacy(graphFonts[10].toInt()),
                                graphFonts[11].toInt());
-        plotTitleFont = QFont(graphFonts[12], graphFonts[13].toInt(), graphFonts[14].toInt(),
+        plotTitleFont = QFont(graphFonts[12], graphFonts[13].toInt(), SciDAVis::fontWeightFromLegacy(graphFonts[14].toInt()),
                               graphFonts[15].toInt());
     }
     settings.endGroup(); // General
@@ -4344,11 +4343,11 @@ void ApplicationWindow::readSettings()
 
     QStringList plot3DFonts = settings.value("/Fonts").toStringList();
     if (plot3DFonts.size() == 12) {
-        plot3DTitleFont = QFont(plot3DFonts[0], plot3DFonts[1].toInt(), plot3DFonts[2].toInt(),
+        plot3DTitleFont = QFont(plot3DFonts[0], plot3DFonts[1].toInt(), SciDAVis::fontWeightFromLegacy(plot3DFonts[2].toInt()),
                                 plot3DFonts[3].toInt());
-        plot3DNumbersFont = QFont(plot3DFonts[4], plot3DFonts[5].toInt(), plot3DFonts[6].toInt(),
+        plot3DNumbersFont = QFont(plot3DFonts[4], plot3DFonts[5].toInt(), SciDAVis::fontWeightFromLegacy(plot3DFonts[6].toInt()),
                                   plot3DFonts[7].toInt());
-        plot3DAxesFont = QFont(plot3DFonts[8], plot3DFonts[9].toInt(), plot3DFonts[10].toInt(),
+        plot3DAxesFont = QFont(plot3DFonts[8], plot3DFonts[9].toInt(), SciDAVis::fontWeightFromLegacy(plot3DFonts[10].toInt()),
                                plot3DFonts[11].toInt());
     }
 
@@ -4386,7 +4385,7 @@ void ApplicationWindow::readSettings()
     strip_spaces = settings.value("/StripSpaces", false).toBool();
     simplify_spaces = settings.value("/SimplifySpaces", false).toBool();
     d_ASCII_file_filter = settings.value("/AsciiFileTypeFilter", "*").toString();
-    d_ASCII_import_locale = settings.value("/AsciiImportLocale", "C").toString();
+    d_ASCII_import_locale = QLocale(settings.value("/AsciiImportLocale", "C").toString());
     d_convert_to_numeric = settings.value("/ConvertToNumeric", true).toBool();
     settings.endGroup(); // Import ASCII
 
@@ -4396,9 +4395,9 @@ void ApplicationWindow::readSettings()
     d_export_quality = settings.value("/ImageQuality", 100).toInt();
     d_export_resolution = settings.value("/Resolution", 72).toInt();
     d_export_color = settings.value("/ExportColor", true).toBool();
-    d_export_vector_size = settings.value("/ExportPageSize", QPrinter::Custom).toInt();
+    d_export_vector_size = settings.value("/ExportPageSize", QPageSize::Custom).toInt();
     d_keep_plot_aspect = settings.value("/KeepAspect", true).toBool();
-    d_export_orientation = settings.value("/Orientation", QPrinter::Landscape).toInt();
+    d_export_orientation = settings.value("/Orientation", QPageLayout::Landscape).toInt();
     settings.endGroup(); // ExportImage
 }
 
@@ -4432,7 +4431,7 @@ void ApplicationWindow::saveSettings()
     QStringList applicationFont;
     applicationFont << appFont.family();
     applicationFont << QString::number(appFont.pointSize());
-    applicationFont << QString::number(appFont.weight());
+    applicationFont << QString::number(SciDAVis::fontWeightToLegacy(appFont.weight()));
     applicationFont << QString::number(appFont.italic());
     settings.setValue("/Font", applicationFont);
 
@@ -4492,11 +4491,11 @@ void ApplicationWindow::saveSettings()
     QStringList tableFonts;
     tableFonts << tableTextFont.family();
     tableFonts << QString::number(tableTextFont.pointSize());
-    tableFonts << QString::number(tableTextFont.weight());
+    tableFonts << QString::number(SciDAVis::fontWeightToLegacy(tableTextFont.weight()));
     tableFonts << QString::number(tableTextFont.italic());
     tableFonts << tableHeaderFont.family();
     tableFonts << QString::number(tableHeaderFont.pointSize());
-    tableFonts << QString::number(tableHeaderFont.weight());
+    tableFonts << QString::number(SciDAVis::fontWeightToLegacy(tableHeaderFont.weight()));
     tableFonts << QString::number(tableHeaderFont.italic());
     settings.setValue("/Fonts", tableFonts);
 
@@ -4528,19 +4527,19 @@ void ApplicationWindow::saveSettings()
     QStringList graphFonts;
     graphFonts << plotAxesFont.family();
     graphFonts << QString::number(plotAxesFont.pointSize());
-    graphFonts << QString::number(plotAxesFont.weight());
+    graphFonts << QString::number(SciDAVis::fontWeightToLegacy(plotAxesFont.weight()));
     graphFonts << QString::number(plotAxesFont.italic());
     graphFonts << plotNumbersFont.family();
     graphFonts << QString::number(plotNumbersFont.pointSize());
-    graphFonts << QString::number(plotNumbersFont.weight());
+    graphFonts << QString::number(SciDAVis::fontWeightToLegacy(plotNumbersFont.weight()));
     graphFonts << QString::number(plotNumbersFont.italic());
     graphFonts << plotLegendFont.family();
     graphFonts << QString::number(plotLegendFont.pointSize());
-    graphFonts << QString::number(plotLegendFont.weight());
+    graphFonts << QString::number(SciDAVis::fontWeightToLegacy(plotLegendFont.weight()));
     graphFonts << QString::number(plotLegendFont.italic());
     graphFonts << plotTitleFont.family();
     graphFonts << QString::number(plotTitleFont.pointSize());
-    graphFonts << QString::number(plotTitleFont.weight());
+    graphFonts << QString::number(SciDAVis::fontWeightToLegacy(plotTitleFont.weight()));
     graphFonts << QString::number(plotTitleFont.italic());
     settings.setValue("/Fonts", graphFonts);
     settings.endGroup(); // General
@@ -4588,15 +4587,15 @@ void ApplicationWindow::saveSettings()
     QStringList plot3DFonts;
     plot3DFonts << plot3DTitleFont.family();
     plot3DFonts << QString::number(plot3DTitleFont.pointSize());
-    plot3DFonts << QString::number(plot3DTitleFont.weight());
+    plot3DFonts << QString::number(SciDAVis::fontWeightToLegacy(plot3DTitleFont.weight()));
     plot3DFonts << QString::number(plot3DTitleFont.italic());
     plot3DFonts << plot3DNumbersFont.family();
     plot3DFonts << QString::number(plot3DNumbersFont.pointSize());
-    plot3DFonts << QString::number(plot3DNumbersFont.weight());
+    plot3DFonts << QString::number(SciDAVis::fontWeightToLegacy(plot3DNumbersFont.weight()));
     plot3DFonts << QString::number(plot3DNumbersFont.italic());
     plot3DFonts << plot3DAxesFont.family();
     plot3DFonts << QString::number(plot3DAxesFont.pointSize());
-    plot3DFonts << QString::number(plot3DAxesFont.weight());
+    plot3DFonts << QString::number(SciDAVis::fontWeightToLegacy(plot3DAxesFont.weight()));
     plot3DFonts << QString::number(plot3DAxesFont.italic());
     settings.setValue("/Fonts", plot3DFonts);
 
@@ -4822,11 +4821,9 @@ void ApplicationWindow::exportAllGraphs()
         QFile f(file_name);
         if (f.exists() && confirm_overwrite) {
             QApplication::restoreOverrideCursor();
-            switch (QMessageBox::question(this, tr("Overwrite file?"),
-                                          tr("A file called: <p><b>%1</b><p>already exists. "
+            switch (SciDAVis::choice(this, QMessageBox::Question, tr("Overwrite file?"), tr("A file called: <p><b>%1</b><p>already exists. "
                                              "Do you want to overwrite it?")
-                                                  .arg(file_name),
-                                          tr("&Yes"), tr("&All"), tr("&Cancel"), 0, 1)) {
+                                                  .arg(file_name), { tr("&Yes"), tr("&All"), tr("&Cancel") }, 0, 1)) {
             case 1:
                 confirm_overwrite = false;
                 QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -5064,7 +5061,7 @@ void ApplicationWindow::saveAsTemplate()
         QString text = SciDAVis::schemaVersion() + " template file\n";
         text += w->saveAsTemplate(windowGeometryInfo(w));
         QTextStream t(&f);
-        t.setCodec(QTextCodec::codecForName("UTF-8"));
+        t.setEncoding(QStringConverter::Utf8);
         t << text;
         f.close();
         QApplication::restoreOverrideCursor();
@@ -5103,7 +5100,7 @@ bool ApplicationWindow::renameWindow(MyWidget *w, const QString &text)
     if (newName.isEmpty()) {
         QMessageBox::critical(this, tr("Error"), tr("Please enter a valid name!"));
         return false;
-    } else if (newName.contains(QRegExp("\\W"))) {
+    } else if (newName.contains(QRegularExpression("\\W"))) {
         QMessageBox::critical(
                 this, tr("Error"),
                 tr("The name you chose is not valid: only letters and digits are allowed!") + "<p>"
@@ -5404,12 +5401,9 @@ void ApplicationWindow::exportAllTables(const QString &sep, bool colNames, bool 
                 QFile f(fileName);
                 if (f.exists(fileName) && confirmOverwrite) {
                     QApplication::restoreOverrideCursor();
-                    switch (QMessageBox::question(
-                            this, tr("Overwrite file?"),
-                            tr("A file called: <p><b>%1</b><p>already exists. "
+                    switch (SciDAVis::choice(this, QMessageBox::Question, tr("Overwrite file?"), tr("A file called: <p><b>%1</b><p>already exists. "
                                "Do you want to overwrite it?")
-                                    .arg(fileName),
-                            tr("&Yes"), tr("&All"), tr("&Cancel"), 0, 1)) {
+                                    .arg(fileName), { tr("&Yes"), tr("&All"), tr("&Cancel") }, 0, 1)) {
                     case 0:
                         success = t->exportASCII(fileName, sep, colNames, expSelection);
                         break;
@@ -6053,10 +6047,8 @@ void ApplicationWindow::removePoints()
         btnPointer->setChecked(true);
         return;
     } else {
-        switch (QMessageBox::warning(this, tr("SciDAVis"),
-                                     tr("This will modify the data in the worksheets!\nAre you "
-                                        "sure you want to continue?"),
-                                     tr("Continue"), tr("Cancel"), 0, 1)) {
+        switch (SciDAVis::choice(this, QMessageBox::Warning, tr("SciDAVis"), tr("This will modify the data in the worksheets!\nAre you "
+                                        "sure you want to continue?"), { tr("Continue"), tr("Cancel") }, 1, -1)) {
         case 0:
             g->setActiveTool(new DataPickerTool(g, this, DataPickerTool::Remove, d_status_info,
                                                 SLOT(setText(const QString &))));
@@ -6096,10 +6088,8 @@ void ApplicationWindow::movePoints()
         btnPointer->setChecked(true);
         return;
     } else {
-        switch (QMessageBox::warning(this, tr("SciDAVis"),
-                                     tr("This will modify the data in the worksheets!\nAre you "
-                                        "sure you want to continue?"),
-                                     tr("Continue"), tr("Cancel"), 0, 1)) {
+        switch (SciDAVis::choice(this, QMessageBox::Warning, tr("SciDAVis"), tr("This will modify the data in the worksheets!\nAre you "
+                                        "sure you want to continue?"), { tr("Continue"), tr("Cancel") }, 1, -1)) {
         case 0:
             if (g) {
                 g->setActiveTool(new DataPickerTool(g, this, DataPickerTool::Move, d_status_info,
@@ -6617,10 +6607,7 @@ void ApplicationWindow::addText()
 
     MultiLayer *plot = (MultiLayer *)d_workspace.activeSubWindow();
 
-    switch (QMessageBox::information(
-            this, tr("Add new layer?"),
-            tr("Do you want to add the text on a new layer or on the active layer?"),
-            tr("On &New Layer"), tr("On &Active Layer"), tr("&Cancel"), 0, 2)) {
+    switch (SciDAVis::choice(this, QMessageBox::Information, tr("Add new layer?"), tr("Do you want to add the text on a new layer or on the active layer?"), { tr("On &New Layer"), tr("On &Active Layer"), tr("&Cancel") }, 0, 2)) {
     case 0:
         plot->addTextLayer(legendFrameStyle, plotLegendFont, legendTextColor, legendBackground);
         break;
@@ -7351,8 +7338,8 @@ void ApplicationWindow::windowsMenuAboutToShow()
     windowsMenu->addSeparator();
     windowsMenu->addAction(actionResizeActiveWindow);
     windowsMenu->addAction(tr("&Hide Window"), this, SLOT(hideActiveWindow()));
-    windowsMenu->addAction(QPixmap(":/close.xpm"), tr("Close &Window"), this,
-                           SLOT(closeActiveWindow()), Qt::CTRL + Qt::Key_W);
+    windowsMenu->addAction(QPixmap(":/close.xpm"), tr("Close &Window"), Qt::CTRL | Qt::Key_W, this,
+                           SLOT(closeActiveWindow()));
 
     if (n > 0 && n < 10) {
         windowsMenu->addSeparator();
@@ -7539,8 +7526,7 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce)
 {
     if (!saved) {
         QString s = tr("Save changes to project: <p><b> %1 </b> ?").arg(projectname);
-        switch (QMessageBox::information(this, tr("SciDAVis"), s, tr("Yes"), tr("No"), tr("Cancel"),
-                                         0, 2)) {
+        switch (SciDAVis::choice(this, QMessageBox::Information, tr("SciDAVis"), s, { tr("Yes"), tr("No"), tr("Cancel") }, 0, 2)) {
         case 0:
             if (!saveProject()) {
                 ce->ignore();
@@ -7613,7 +7599,7 @@ void ApplicationWindow::deleteSelectedItems()
 QMenu *ApplicationWindow::showListViewSelectionMenuImpl()
 {
     QMenu *cm = new QMenu(this);
-    cm->addAction(tr("&Delete Selection"), this, SLOT(deleteSelectedItems()), Qt::Key_F8);
+    cm->addAction(tr("&Delete Selection"), Qt::Key_F8, this, SLOT(deleteSelectedItems()));
     return cm;
 }
 
@@ -7628,8 +7614,8 @@ QMenu *ApplicationWindow::showListViewPopupMenuImpl()
     window->addAction(actionNewGraph);
     window->addAction(actionNewFunctionPlot);
     window->addAction(actionNewSurfacePlot);
-    cm->addAction(QPixmap(":/newfolder.xpm"), tr("New F&older"), this, SLOT(addFolder()),
-                  Qt::Key_F7);
+    cm->addAction(QPixmap(":/newfolder.xpm"), tr("New F&older"), Qt::Key_F7, this,
+                  SLOT(addFolder()));
     cm->addSeparator();
     cm->addAction(tr("Auto &Column Width"), &lv, SLOT(adjustColumns()));
     return cm;
@@ -7715,7 +7701,7 @@ QStringList ApplicationWindow::dependingPlots(const QString &name)
             foreach (QWidget *widget, lst) {
                 Graph *g = (Graph *)widget;
                 onPlot = g->curvesList();
-                onPlot = onPlot.filter(QRegExp("^" + name + "_.*"));
+                onPlot = onPlot.filter(QRegularExpression("^" + name + "_.*"));
                 if (onPlot.count() > 0 && !plots.contains(w->name()))
                     plots << w->name();
             }
@@ -8890,11 +8876,8 @@ void ApplicationWindow::addLayer()
         return;
 
     MultiLayer *plot = (MultiLayer *)d_workspace.activeSubWindow();
-    switch (QMessageBox::information(
-            this, tr("Guess best origin for the new layer?"),
-            tr("Do you want SciDAVis to guess the best position for the new layer?\n Warning: this "
-               "will rearrange existing layers!"),
-            tr("&Guess"), tr("&Top-left corner"), tr("&Cancel"), 0, 2)) {
+    switch (SciDAVis::choice(this, QMessageBox::Information, tr("Guess best origin for the new layer?"), tr("Do you want SciDAVis to guess the best position for the new layer?\n Warning: this "
+               "will rearrange existing layers!"), { tr("&Guess"), tr("&Top-left corner"), tr("&Cancel") }, 0, 2)) {
     case 0: {
         setPreferences(plot->addLayer());
         plot->arrangeLayers(true, false);
@@ -9144,7 +9127,7 @@ Table *ApplicationWindow::openTable(ApplicationWindow *app, QTextStream &stream)
         QString tmp_string;
         if (tmp_file.open()) {
             QTextStream tmp(&tmp_file);
-            tmp.setCodec(QTextCodec::codecForName("UTF-8"));
+            tmp.setEncoding(QStringConverter::Utf8);
             int read = 0;
             while (length - read >= 1024) {
                 tmp << stream.read(1024);
@@ -9655,7 +9638,7 @@ Graph *ApplicationWindow::openGraph(ApplicationWindow *app, MultiLayer *plot,
             ag->setTitleAlignment(fList[3].toInt());
         } else if (s.contains("TitleFont")) {
             QStringList fList = s.split("\t");
-            QFont fnt = QFont(fList[1], fList[2].toInt(), fList[3].toInt(), fList[4].toInt());
+            QFont fnt = QFont(fList[1], fList[2].toInt(), SciDAVis::fontWeightFromLegacy(fList[3].toInt()), fList[4].toInt());
             fnt.setUnderline(fList[5].toInt());
             fnt.setStrikeOut(fList[6].toInt());
             ag->setTitleFont(fnt);
@@ -9682,7 +9665,7 @@ Graph *ApplicationWindow::openGraph(ApplicationWindow *app, MultiLayer *plot,
             ag->setAxesTitlesAlignment(align);
         } else if (s.contains("ScaleFont")) {
             QStringList fList = s.split("\t");
-            QFont fnt = QFont(fList[1], fList[2].toInt(), fList[3].toInt(), fList[4].toInt());
+            QFont fnt = QFont(fList[1], fList[2].toInt(), SciDAVis::fontWeightFromLegacy(fList[3].toInt()), fList[4].toInt());
             fnt.setUnderline(fList[5].toInt());
             fnt.setStrikeOut(fList[6].toInt());
 
@@ -9690,7 +9673,7 @@ Graph *ApplicationWindow::openGraph(ApplicationWindow *app, MultiLayer *plot,
             ag->setAxisTitleFont(axis, fnt);
         } else if (s.contains("AxisFont")) {
             QStringList fList = s.split("\t");
-            QFont fnt = QFont(fList[1], fList[2].toInt(), fList[3].toInt(), fList[4].toInt());
+            QFont fnt = QFont(fList[1], fList[2].toInt(), SciDAVis::fontWeightFromLegacy(fList[3].toInt()), fList[4].toInt());
             fnt.setUnderline(fList[5].toInt());
             fnt.setStrikeOut(fList[6].toInt());
 
@@ -10525,7 +10508,7 @@ void ApplicationWindow::createActions()
     connect(actionAddImage, SIGNAL(triggered()), this, SLOT(addImage()));
 
     d_plot_mapper = new QSignalMapper;
-    connect(d_plot_mapper, SIGNAL(mapped(int)), this, SLOT(selectPlotType(int)));
+    connect(d_plot_mapper, SIGNAL(mappedInt(int)), this, SLOT(selectPlotType(int)));
 
     actionPlotL = new QAction(QIcon(QPixmap(":/lPlot.xpm")), tr("&Line"), this);
     connect(actionPlotL, SIGNAL(triggered()), d_plot_mapper, SLOT(map()));
@@ -12125,15 +12108,15 @@ void ApplicationWindow::appendProject(const QString &fn)
 #endif
     else {
         QTextStream t(file);
-        t.setCodec(QTextCodec::codecForName("UTF-8"));
+        t.setEncoding(QStringConverter::Utf8);
 
         QString s = t.readLine();
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-        lst = s.split(QRegExp("\\s"), Qt::SkipEmptyParts);
+        lst = s.split(QRegularExpression("\\s"), Qt::SkipEmptyParts);
         QString version = lst[1];
         lst = version.split(".", Qt::SkipEmptyParts);
 #else
-        lst = s.split(QRegExp("\\s"), QString::SkipEmptyParts);
+        lst = s.split(QRegularExpression("\\s"), QString::SkipEmptyParts);
         QString version = lst[1];
         lst = version.split(".", QString::SkipEmptyParts);
 #endif
@@ -12290,7 +12273,7 @@ void ApplicationWindow::appendProject(const QString &fn)
 void ApplicationWindow::rawSaveFolder(Folder *folder, QIODevice *device)
 {
     QTextStream stream(device);
-    stream.setCodec(QTextCodec::codecForName("UTF-8"));
+    stream.setEncoding(QStringConverter::Utf8);
     foreach (MyWidget *w, folder->windowsList()) {
         Table *t = qobject_cast<Table *>(w);
         if (t)
@@ -12322,20 +12305,18 @@ void ApplicationWindow::saveFolder(Folder *folder, const QString &fn)
         // The following message is slightly misleading, since it may be that fn.new can't be opened
         // _at_all_. However, changing this would break translations, in a bugfix release.
         // TODO: rephrase message for next minor release
-        switch (QMessageBox::critical(
-                this, tr("File save error"),
-                tr("The file: <br><b>%1</b> is opened in read-only mode").arg(fn + ".new"),
-                QMessageBox::Retry | QMessageBox::Default,
-                QMessageBox::Abort | QMessageBox::Escape)) {
-        case QMessageBox::Abort:
+        if (QMessageBox::critical(
+                    this, tr("File save error"),
+                    tr("The file: <br><b>%1</b> is opened in read-only mode").arg(fn + ".new"),
+                    QMessageBox::Retry | QMessageBox::Abort, QMessageBox::Retry)
+            == QMessageBox::Abort)
             return;
-        }
     }
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     QTextStream t(&f);
-    t.setCodec(QTextCodec::codecForName("UTF-8"));
+    t.setEncoding(QStringConverter::Utf8);
     t << SciDAVis::schemaVersion() + " project file\n";
     t << "<scripting-lang>\t" + QString(scriptEnv->objectName()) + "\n";
     t << "<windows>\t" + QString::number(folder->windowCount(true)) + "\n";
@@ -12461,9 +12442,9 @@ QMenu *ApplicationWindow::showFolderPopupMenuImpl(QTreeWidgetItem *it, bool from
     }
 
     if (((FolderListItem *)it)->folder()->parent()) {
-        cm->addAction(QPixmap(":/close.xpm"), tr("&Delete Folder"), this, SLOT(deleteFolder()),
-                      Qt::Key_F8);
-        cm->addAction(tr("&Rename"), this, SLOT(startRenameFolder()), Qt::Key_F2);
+        cm->addAction(QPixmap(":/close.xpm"), tr("&Delete Folder"), Qt::Key_F8, this,
+                      SLOT(deleteFolder()));
+        cm->addAction(tr("&Rename"), Qt::Key_F2, this, SLOT(startRenameFolder()));
         cm->addSeparator();
     }
 
@@ -12477,8 +12458,8 @@ QMenu *ApplicationWindow::showFolderPopupMenuImpl(QTreeWidgetItem *it, bool from
         window->addAction(actionNewSurfacePlot);
     }
 
-    cm->addAction(QPixmap(":/newfolder.xpm"), tr("New F&older"), this, SLOT(addFolder()),
-                  Qt::Key_F7);
+    cm->addAction(QPixmap(":/newfolder.xpm"), tr("New F&older"), Qt::Key_F7, this,
+                  SLOT(addFolder()));
     cm->addSeparator();
 
     QMenu *viewWindowsMenu = cm->addMenu(tr("&View Windows"));
@@ -12723,8 +12704,7 @@ void ApplicationWindow::projectProperties()
     } else
         s += tr("Created") + ": " + current_folder->birthDate() + "\n\n";
 
-    QMessageBox *mbox = new QMessageBox(tr("Properties"), s, QMessageBox::NoIcon, QMessageBox::Ok,
-                                        QMessageBox::NoButton, QMessageBox::NoButton, this);
+    QMessageBox *mbox = new QMessageBox(QMessageBox::NoIcon, tr("Properties"), s, QMessageBox::Ok, this);
 
     mbox->setIconPixmap(QPixmap(":/appicon"));
     mbox->show();
@@ -12749,8 +12729,7 @@ void ApplicationWindow::folderProperties()
     s += tr("Created") + ": " + current_folder->birthDate() + "\n\n";
     // s += tr("Modified") + ": " + current_folder->modificationDate() + "\n\n";
 
-    QMessageBox *mbox = new QMessageBox(tr("Properties"), s, QMessageBox::NoIcon, QMessageBox::Ok,
-                                        QMessageBox::NoButton, QMessageBox::NoButton, this);
+    QMessageBox *mbox = new QMessageBox(QMessageBox::NoIcon, tr("Properties"), s, QMessageBox::Ok, this);
 
     mbox->setIconPixmap(QPixmap(":/folder_open.xpm"));
     mbox->show();
@@ -12778,10 +12757,7 @@ void ApplicationWindow::addFolder()
 bool ApplicationWindow::deleteFolder(Folder *f)
 {
     if (confirmCloseFolder
-        && QMessageBox::information(
-                this, tr("Delete folder?"),
-                tr("Delete folder '%1' and all the windows it contains?").arg(f->name()), tr("Yes"),
-                tr("No"), 0, 0)) {
+        && SciDAVis::choice(this, QMessageBox::Information, tr("Delete folder?"), tr("Delete folder '%1' and all the windows it contains?").arg(f->name()), { tr("Yes"), tr("No") }, 0, -1)) {
         return false;
     } else {
         FolderListItem *fi = f->folderListItem();
@@ -13046,8 +13022,7 @@ void ApplicationWindow::windowProperties()
         return;
 
     QMessageBox *mbox =
-            new QMessageBox(tr("Properties"), QString(), QMessageBox::NoIcon, QMessageBox::Ok,
-                            QMessageBox::NoButton, QMessageBox::NoButton, this);
+            new QMessageBox(QMessageBox::NoIcon, tr("Properties"), QString(), QMessageBox::Ok, this);
 
     QString s = QString(w->name()) + "\n\n";
     s += "\n\n\n";
@@ -13271,7 +13246,7 @@ void ApplicationWindow::searchForUpdates()
                "Please modify your firewall settings in order to allow SciDAVis to connect to the "
                "internet.")
                     + "\n" + tr("Do you wish to continue?"),
-            QMessageBox::Yes | QMessageBox::Default, QMessageBox::No | QMessageBox::Escape);
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
     if (choice == QMessageBox::Yes) {
         // http.get(QNetworkRequest(QUrl("http://scidavis.sourceforge.net/current_version.txt")));
@@ -13296,7 +13271,7 @@ void ApplicationWindow::receivedVersionFile(QNetworkReply *netreply)
         int available_version = 0;
         bool intok = false;
         QTextStream t(version_buffer);
-        t.setCodec(QTextCodec::codecForName("UTF-8"));
+        t.setEncoding(QStringConverter::Utf8);
         QStringList version_lines = t.readAll().split('\n');
 
         if (version_lines.count() == 1) {
@@ -13316,8 +13291,7 @@ void ApplicationWindow::receivedVersionFile(QNetworkReply *netreply)
                                           tr("There is a newer version of SciDAVis (%1) available "
                                              "for download. Would you like to download it now?")
                                                   .arg(available_versionString),
-                                          QMessageBox::Yes | QMessageBox::Default,
-                                          QMessageBox::No | QMessageBox::Escape)
+                                          QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)
                     == QMessageBox::Yes)
                     QDesktopServices::openUrl(QUrl(DOWNLOAD_URI));
             } else {
@@ -13379,10 +13353,8 @@ void ApplicationWindow::clearTable()
     if (!t || !t->inherits("Table"))
         return;
 
-    if (QMessageBox::question(this, tr("Warning"),
-                              tr("This will clear the contents of all the data associated with the "
-                                 "table. Are you sure?"),
-                              tr("&Yes"), tr("&No"), QString(), 0, 1))
+    if (SciDAVis::choice(this, QMessageBox::Question, tr("Warning"), tr("This will clear the contents of all the data associated with the "
+                                 "table. Are you sure?"), { tr("&Yes"), tr("&No") }, 0, 1))
         return;
     else
         t->clear();
