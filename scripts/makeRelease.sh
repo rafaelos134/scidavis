@@ -33,13 +33,13 @@ for i in scidavis/translations/*.ts; do
 done
 
 # update Doxyversion
-rm -f Doxyversion
-echo "PROJECT_NUMBER=$version" >Doxyversion
-echo "$version" >doc/version.tex
+rm -f docs/api/Doxyversion
+echo "PROJECT_NUMBER=$version" >docs/api/Doxyversion
+echo "$version" >docs/manual/version.tex
 
 # update scidavis.appdata.xml
 date=`date +%Y-%m-%d`
-sed -i "s/<release version=.*$/<release version=\"$version\" date=\"$date\">/" scidavis/scidavis.appdata.xml
+sed -i "s/<release version=.*$/<release version=\"$version\" date=\"$date\">/" scidavis/data/scidavis.appdata.xml
 
 git commit --no-verify -a -m "Release $fullversion"
 git tag -a -m "" $fullversion

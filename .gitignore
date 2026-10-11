@@ -10,6 +10,7 @@ Makefile
 build/
 build-*/
 build-compiletest/
+build-coverage/
 CMakeLists.txt.user*
 
 aqtinstall.log

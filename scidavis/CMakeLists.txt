@@ -1,12 +1,12 @@
 set( RESOURCES
-  "appicons.qrc"
-  "icons.qrc"
-  "styles.qrc"
-  "themedicons.qrc"
+  "resources/appicons.qrc"
+  "resources/icons.qrc"
+  "resources/styles.qrc"
+  "resources/themedicons.qrc"
   )
 
 if( WIN32 )
-  list( APPEND RESOURCES "scidavis.rc" )
+  list( APPEND RESOURCES "resources/scidavis.rc" )
 endif()
 
 # Translation Files
@@ -69,7 +69,7 @@ endif()
 if( SCRIPTING_PYTHON )
 
   if( MULTI_CONFIG )
-    file( GENERATE OUTPUT $<CONFIG>/scidavisrc.py INPUT scidavisrc.py )
+    file( GENERATE OUTPUT $<CONFIG>/scidavisrc.py INPUT python/scidavisrc.py )
     add_custom_command( OUTPUT scidavisrc.pyc
       COMMAND ${Python3_EXECUTABLE} -m compileall -b scidavisrc.py
       WORKING_DIRECTORY $<CONFIG>
@@ -79,7 +79,7 @@ if( SCRIPTING_PYTHON )
       DEPENDS $<CONFIG>/scidavisrc.pyc
       )
   else()
-    file( COPY scidavisrc.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
+    file( COPY python/scidavisrc.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
     add_custom_command( OUTPUT scidavisrc.pyc
       COMMAND ${Python3_EXECUTABLE} -m compileall -b scidavisrc.py
       COMMENT "Compiling python files"
@@ -133,26 +133,26 @@ endif()
     # Icons
     
     if( UNIX )
-      install( FILES icons/scidavis.svg DESTINATION share/icons/hicolor/scalable/apps )
+      install( FILES resources/icons/scidavis.svg DESTINATION share/icons/hicolor/scalable/apps )
     
       foreach( res IN ITEMS 16 22 32 48 64 128 )
-        install( FILES icons/hicolor-${res}/scidavis.png
+        install( FILES resources/icons/hicolor-${res}/scidavis.png
           DESTINATION share/icons/hicolor/${res}x${res}/apps )
       endforeach()
     
       foreach( res IN ITEMS 16 22 32 )
-        install( FILES icons/locolor-${res}/scidavis.png
+        install( FILES resources/icons/locolor-${res}/scidavis.png
           DESTINATION share/icons/locolor/${res}x${res}/apps )
       endforeach()
     endif()
     
     # Application Files
     if( UNIX )
-      install( FILES scidavis.desktop DESTINATION share/applications )
-      install( FILES scidavis.xml DESTINATION share/mime/packages )
-      install( FILES scidavis.1 DESTINATION share/man/man1 )
-      install( FILES scidavis.appdata.xml DESTINATION share/metainfo )
-      install( FILES x-sciprj.desktop DESTINATION share/mimelnk/application )
+      install( FILES data/scidavis.desktop DESTINATION share/applications )
+      install( FILES data/scidavis.xml DESTINATION share/mime/packages )
+      install( FILES data/scidavis.1 DESTINATION share/man/man1 )
+      install( FILES data/scidavis.appdata.xml DESTINATION share/metainfo )
+      install( FILES data/x-sciprj.desktop DESTINATION share/mimelnk/application )
     endif()
     
     if( SCRIPTING_PYTHON )
@@ -160,10 +160,10 @@ endif()
         set(PYTHON_SCRIPTDIR etc)
       endif()
       if( MULTI_CONFIG )
-        install( FILES scidavisrc.py ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/scidavisrc.pyc DESTINATION ${PYTHON_SCRIPTDIR} )
+        install( FILES python/scidavisrc.py ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/scidavisrc.pyc DESTINATION ${PYTHON_SCRIPTDIR} )
       else()
-        install( FILES scidavisrc.py ${CMAKE_CURRENT_BINARY_DIR}/scidavisrc.pyc DESTINATION ${PYTHON_SCRIPTDIR} )
+        install( FILES python/scidavisrc.py ${CMAKE_CURRENT_BINARY_DIR}/scidavisrc.pyc DESTINATION ${PYTHON_SCRIPTDIR} )
       endif()
-      install( FILES scidavisUtil.py DESTINATION share/scidavis )
+      install( FILES python/scidavisUtil.py DESTINATION share/scidavis )
     endif()
 endif()

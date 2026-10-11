@@ -1,21 +1,15 @@
-# runs the coverage test, building HTML display of test-covered code
-# build first with coverage instrumentation, e.g.
-#cmake -S . -B build -DBUILD_TESTS=ON -DCMAKE_CXX_FLAGS=--coverage
-#cmake --build build -j4
+#!/bin/bash
+# Build with coverage instrumentation, run the test suite and write an HTML report to
+# build-coverage/coverage/index.html (needs lcov). Qt 6 is located through CMAKE_PREFIX_PATH:
+#   CMAKE_PREFIX_PATH=$HOME/Qt/6.8.3/gcc_64 scripts/run-coverage.sh
 cd "$(dirname "$0")/.." || exit 1   # run from the repository root
-for i in test/00/*; do
-    sh $i
-done
-
-# gen_info source path rewriting no longer seems to cope with the
-# scidavis file layout, so just fake it by creating some symbolic
-# links where lcov and genhtml expect the source files to be
-ln -sf `pwd`/libscidavis/src tmp
-ln -sf `pwd`/test/*.{h,cpp} tmp/test
-dir=tmp/libscidavis
-
-lcov -i -c -d . --exclude tmp/test --no-external -o lcovi.info
-lcov -c -d . --exclude tmp/test  --no-external -o lcovt.info
-rm lcov.info
-lcov -a lcovi.info -a lcovt.info -o lcov.info
-genhtml --ignore-errors source -o coverage lcov.info
+build=build-coverage
+cmake -S . -B $build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON \
+      -DSEARCH_FOR_UPDATES=OFF -DDOWNLOAD_LINKS=OFF \
+      -DCMAKE_CXX_FLAGS=--coverage -DCMAKE_C_FLAGS=--coverage || exit 1
+cmake --build $build -j"$(nproc)" || exit 1
+(cd $build && ctest --output-on-failure)
+lcov --capture --directory $build --no-external --base-directory . -o $build/lcov.info
+lcov --remove $build/lcov.info '*/3rdparty/*' '*/test/*' '*_autogen/*' -o $build/lcov.info
+genhtml --ignore-errors source -o $build/coverage $build/lcov.info
+echo "report: $build/coverage/index.html"

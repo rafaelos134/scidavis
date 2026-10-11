@@ -1,9 +1,9 @@
-"""Write SciDAVis' themed icon set (scidavis/icons/themed).
+"""Write SciDAVis' themed icon set (scidavis/resources/icons/themed).
 
 Usage: make_themed_icons.py <tabler-icons outline dir> <output dir>
   e.g. download https://registry.npmjs.org/@tabler/icons/-/icons-3.49.0.tgz, extract it and run
-  scripts/icons/make_themed_icons.py package/icons/outline scidavis/icons/themed
-Afterwards regenerate scidavis/themedicons.qrc if icons were added or removed.
+  scripts/icons/make_themed_icons.py package/icons/outline scidavis/resources/icons/themed
+Afterwards regenerate scidavis/resources/themedicons.qrc if icons were added or removed.
 
 
 Tabler icons (MIT) are copied under SciDAVis' historical icon names; the scientific icons

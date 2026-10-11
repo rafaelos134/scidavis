@@ -46,11 +46,11 @@ include(GoogleTest)
 gtest_discover_tests( unittest DISCOVERY_MODE PRE_TEST )
 
 set( TestDataFiles
-  "3dplot.sciprj"
-  "3dplotTable.sciprj"
-  "testProject.sciprj"
-  "Histo.opj"
-  "USstates.opj"
+  "data/3dplot.sciprj"
+  "data/3dplotTable.sciprj"
+  "data/testProject.sciprj"
+  "data/Histo.opj"
+  "data/USstates.opj"
   )
 file( COPY ${TestDataFiles} DESTINATION . )
 
@@ -60,7 +60,7 @@ if( NOT (SEARCH_FOR_UPDATES OR DOWNLOAD_LINKS) )
 
   foreach( menu ${menu_files} )
     get_filename_component( test_name ${menu} NAME_WLE )
-    add_test( NAME menuData_${test_name} COMMAND diff -q ${menu} ${CMAKE_CURRENT_SOURCE_DIR}/menuData/${menu} )
+    add_test( NAME menuData_${test_name} COMMAND diff -q ${menu} ${CMAKE_CURRENT_SOURCE_DIR}/reference/menus/${menu} )
     set_tests_properties( menuData_${test_name} PROPERTIES DEPENDS unittest )
   endforeach()
 
@@ -68,10 +68,10 @@ endif()
 
 if( SCRIPTING_PYTHON )
   
-  file( COPY pythonTests/ DESTINATION ./tmp )
-  file( COPY ../scidavis-logo.png DESTINATION ./tmp )
+  file( COPY python/ DESTINATION ./tmp )
+  file( COPY ../scidavis/resources/icons/scidavis-logo.png DESTINATION ./tmp )
 
-  file( GLOB pythonTests pythonTests/*.py )
+  file( GLOB pythonTests python/*.py )
 
   foreach( pythonTest ${pythonTests} )
     get_filename_component( test_name ${pythonTest} NAME_WLE )

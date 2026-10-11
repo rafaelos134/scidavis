@@ -7,7 +7,7 @@ C++20 com Qt 6 (6.8 LTS). Roda em Linux, Windows e macOS.
 - Manual do usuário: <https://highperformancecoder.github.io/scidavis-handbook/>
 - Site: <http://scidavis.sourceforge.net>
 - Compilação e instalação: [INSTALL.md](INSTALL.md)
-- Licença, créditos e política de versões: [CREDITS.md](CREDITS.md) · [gpl.txt](gpl.txt)
+- Licença, créditos e política de versões: [CREDITS.md](CREDITS.md) · [LICENSE](LICENSE)
 - Histórico de mudanças: [ChangeLog.md](ChangeLog.md)
 
 ---
@@ -47,33 +47,50 @@ C++20 com Qt 6 (6.8 LTS). Roda em Linux, Windows e macOS.
 
 ```
 scidavis/
-├── CMakeLists.txt          # Build (CMake)
-├── libscidavis/            # >>> Biblioteca com TODA a lógica do programa <<<
+├── CMakeLists.txt          # build (CMake) do projeto inteiro
+├── README.md               # este arquivo: funcionalidades, arquitetura, como compilar
+├── CONTRIBUTING.md         # como colaborar (comece por aqui)
+├── CREDITS.md · LICENSE    # créditos e licença (GPL v2+)
+├── ChangeLog.md · NEWS.md  # histórico de versões e notas da versão atual
+├── INSTALL.md · SECURITY.md
+│
+├── libscidavis/            # >>> biblioteca com TODA a lógica do programa <<<
 │   ├── CMakeLists.txt      #   lista de fontes
-│   └── src/                #   código-fonte (ver seção 3)
-├── scidavis/               # Executável: main.cpp, ícones, traduções, .desktop, scidavisrc.py
+│   └── src/                #   código, separado por módulo (ver seção 3)
+├── scidavis/               # o executável
 │   ├── src/main.cpp        #   ponto de entrada
-│   ├── icons/              #   ícones (.qrc)
-│   └── translations/       #   arquivos .ts do Qt Linguist
-├── fitPlugins/             # Exemplos de plugins de ajuste (bibliotecas carregadas em tempo de execução)
-├── test/                   # Testes unitários (GoogleTest) e projetos de exemplo
-├── 3rdparty/               # Bibliotecas externas
+│   ├── resources/          #   recursos embutidos: ícones, temas (QSS), arquivos .qrc
+│   ├── translations/       #   traduções (.ts do Qt Linguist)
+│   ├── python/             #   scidavisrc.py e scidavisUtil.py (scripts em Python)
+│   └── data/               #   integração com o sistema: .desktop, appdata, MIME, página de manual
+├── plugins/
+│   └── fit/                #   exemplos de plugins de ajuste de curvas (bibliotecas dinâmicas)
+├── test/                   # testes (GoogleTest + scripts Python)
+│   ├── *.cpp               #   testes em C++
+│   ├── python/             #   testes em Python
+│   ├── data/               #   projetos de exemplo usados pelos testes
+│   └── reference/          #   saídas esperadas (menus)
+├── 3rdparty/               # bibliotecas externas
 │   ├── qwt5/               #   Qwt 5.2 portada para Qt 6 (código incluído no repositório)
 │   ├── qwtplot3d/          #   gráficos 3D (submódulo git)
 │   ├── liborigin/          #   leitura de projetos do Origin (submódulo git)
 │   └── minigzip/           #   compressão de arquivos .sciprj.gz
-├── cmake/                  # Módulos CMake (FindSIP, FindPyQt, Windeployqt)
-├── manual/                 # Manual em LaTeX
-├── doc/                    # Extras de documentação
-├── scripts/                # Scripts de desenvolvimento (release, traduções, cobertura, hook de commit)
-├── packaging/              # Empacotamento (MSI Windows, bundle macOS, MacPorts, MXE)
-│   └── legacy-win32/       #   build antigo Win32/Qt4 (histórico, não usado pelo CI)
-├── obsCheck/               # Dockerfiles para testar pacotes do openSUSE Build Service
-├── screenshots/            # Capturas de tela
-├── .github/workflows/      # CI (Ubuntu, MSVC, MinGW, macOS) e empacotamento
-├── Doxyfile, Doxyprogrammers # Geração de documentação da API (doxygen)
-└── _clang-format           # Estilo de código (aplique com clang-format -i)
+├── docs/                   # documentação
+│   ├── manual/             #   manual do usuário (LaTeX)
+│   ├── api/                #   configuração do Doxygen (documentação do código)
+│   ├── screenshots/        #   capturas de tela
+│   └── ROADMAP.md          #   melhorias planejadas e guia de tarefas para colaboradores
+├── cmake/                  # módulos do CMake (FindSIP, FindPyQt, Windeployqt)
+├── scripts/                # ferramentas de desenvolvimento (release, traduções, cobertura, ícones)
+├── packaging/              # empacotamento
+│   ├── windows/            #   instalador MSI e licença do instalador
+│   ├── macos/              #   bundle .app/.pkg
+│   └── obs/                #   testes de pacotes do openSUSE Build Service (Docker)
+├── .github/                # CI (Ubuntu, Windows MSVC/MinGW, macOS), modelos de issue
+└── .clang-format           # estilo de código (aplique com clang-format -i)
 ```
+
+Pastas `build*/` são geradas pela compilação e ignoradas pelo git.
 
 ---
 
@@ -109,8 +126,8 @@ libscidavis/src/
 |---|---|
 | `ApplicationWindow.*` | Janela principal (MDI): menus, barras de ferramentas, abrir/salvar `.sciprj`, criação de tabelas/gráficos, ligação entre todos os módulos. É o maior arquivo do projeto (~13,7 mil linhas). |
 | `globals.*`, `version.cpp` | Número de versão, diálogo "Sobre" (`SciDAVisAbout.ui`). `version.cpp` é reescrito por `scripts/makeRelease.sh`. |
-| `IconLoader.*` | Ícones da interface: SVGs monocromáticos (`scidavis/icons/themed/`) desenhados na hora com as cores da paleta, então acompanham o tema sem precisar recriar as ações. |
-| `Theme.*` | Temas **Sistema** (segue o claro/escuro do sistema operacional), **Claro** e **Escuro**: paleta, estilo (Fusion com barras de título próprias) e a folha de estilo `scidavis/styles/theme.qss`, cujos `@tokens@` recebem as cores do tema. |
+| `IconLoader.*` | Ícones da interface: SVGs monocromáticos (`scidavis/resources/icons/themed/`) desenhados na hora com as cores da paleta, então acompanham o tema sem precisar recriar as ações. |
+| `Theme.*` | Temas **Sistema** (segue o claro/escuro do sistema operacional), **Claro** e **Escuro**: paleta, estilo (Fusion com barras de título próprias) e a folha de estilo `scidavis/resources/styles/theme.qss`, cujos `@tokens@` recebem as cores do tema. |
 | `customevents.h`, `SciDAVisObject.h`, `QStringStdString.h` | Eventos Qt próprios, classe-base para objetos scriptáveis, conversões de string. |
 
 ### `project/` — objetos que aparecem na árvore do projeto
@@ -206,7 +223,7 @@ gera a tabela/curva de resultado.
 | Sigmoidal | `analysis/fit/SigmoidalFit.cpp` | Boltzmann |
 | Gauss / Lorentz / multi-picos | `analysis/fit/MultiPeakFit.cpp` | `GaussFit`, `LorentzFit`, `GaussAmpFit`, `MultiPeakFit` |
 | Fórmula do usuário | `analysis/fit/NonLinearFit.cpp` | Expressão digitada no `FitDialog` |
-| Plugins de ajuste | `analysis/fit/PluginFit.cpp` + `fitPlugins/` | Carrega funções de bibliotecas dinâmicas |
+| Plugins de ajuste | `analysis/fit/PluginFit.cpp` + `plugins/fit/` | Carrega funções de bibliotecas dinâmicas |
 | Estatísticas | `project/TableStatistics.cpp` | `gsl_stats_mean`, `gsl_stats_sd`, `gsl_stats_variance`, soma, min/max |
 | Fórmulas de colunas/matrizes | `scripting/MuParserScript.cpp`, `scripting/MuParserScripting.cpp` | muParser + funções embutidas; `col("A")`, `cell(i,j)` |
 | Curvas de função f(x), paramétricas e polares | `plot/FunctionCurve.cpp` | Amostragem da expressão com o ambiente muParser (`ScriptingLangManager`) |
@@ -259,7 +276,7 @@ Pontos importantes:
   `aspectcommands.h`, `columncommands.*`, `tablecommands.*`, `matrixcommands.*`.
 - **Bindings Python**: `scripting/scidavis.sip` expõe `ApplicationWindow`,
   `Table`, `Matrix`, `Graph`, os fits e filtros para Python; o módulo de
-  inicialização é `scidavis/scidavisrc.py`.
+  inicialização é `scidavis/python/scidavisrc.py`.
 
 ---
 
@@ -337,9 +354,9 @@ SciDAVis que recebem enums continuam aceitando números inteiros.
 ### Interface: temas e ícones
 
 - **Cores**: altere as paletas em `lightColors()`/`darkColors()` (`app/Theme.cpp`); a folha de
-  estilo `scidavis/styles/theme.qss` usa os mesmos nomes como `@tokens@`.
-- **Ícones**: use sempre `IconLoader::load("nome")`. Os SVGs ficam em `scidavis/icons/themed/`
-  (lista em `scidavis/themedicons.qrc`), usam `currentColor` para o traço e `#ACCENT` para a cor
+  estilo `scidavis/resources/styles/theme.qss` usa os mesmos nomes como `@tokens@`.
+- **Ícones**: use sempre `IconLoader::load("nome")`. Os SVGs ficam em `scidavis/resources/icons/themed/`
+  (lista em `scidavis/resources/themedicons.qrc`), usam `currentColor` para o traço e `#ACCENT` para a cor
   de destaque. A maioria vem do [Tabler Icons](https://tabler.io/icons) (MIT); os ícones científicos
   (box plot, superfícies 3D, campos vetoriais, grades...) são desenhados no mesmo estilo por
   `scripts/icons/make_themed_icons.py`, que também mapeia os nomes antigos (`icon_mapping.py`).
@@ -368,13 +385,8 @@ raiz do repositório antes de executar.
 
 ## 7. Como contribuir
 
-- **Adicionando um arquivo novo**: coloque-o na pasta do módulo correspondente e
-  adicione-o em `libscidavis/CMakeLists.txt` (listas `HEADERS`/`SRCS`). Não é
-  preciso mexer em include paths.
-- **Nova pasta de módulo**: inclua-a em `target_include_directories` no
-  `libscidavis/CMakeLists.txt`.
-- **Nova análise**: herde de `Filter` (ou de `Fit` para ajustes) em `analysis/`,
-  implemente `calculateOutputData()` (ou as funções-modelo em `fit_gsl.cpp`) e
-  crie o diálogo em `dialogs/`.
-- **Estilo**: rode `clang-format -i <arquivo>` (regras em `_clang-format`).
-- **Mover arquivos**: use `git mv` para preservar o histórico (`git log --follow`).
+O passo a passo (ambiente, onde fica cada coisa, regras do código, testes e pull requests) está em
+[CONTRIBUTING.md](CONTRIBUTING.md); tarefas planejadas, em [docs/ROADMAP.md](docs/ROADMAP.md).
+Para criar uma análise nova: herde de `Filter` (ou de `Fit` para ajustes) em `analysis/`,
+implemente `calculateOutputData()` (ou as funções-modelo em `fit_gsl.cpp`) e crie o diálogo em
+`dialogs/`.

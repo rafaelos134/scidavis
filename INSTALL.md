@@ -78,7 +78,7 @@ MXE_HOME, do
 8. Create the install shield from scidavis top level directory
    - start cygwin bash shell
    - cd scidavis
-   - sh packaging/makeMsi.sh
+   - sh packaging/windows/makeMsi.sh
 
 9. Do a test from the command prompt with
    - msiexec -i scidavis-XXX.msi
@@ -133,7 +133,7 @@ ln -sf /opt/local/Library/Frameworks/Python.framework/Versions/2.7/share/sip /op
   - make
 
 8. Create the installable package
-  - sh packaging/mkMacDist.sh
+  - sh packaging/macos/mkMacDist.sh
 
 ## Additional information
 

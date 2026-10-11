@@ -1,4 +1,5 @@
 #!/bin/bash
-cd "$(dirname "$0")/.." || exit 1   # run from the repository root
+# Build the API documentation (docs/api/Doxyfile) and upload it to the project web site
+cd "$(dirname "$0")/../docs/api" || exit 1
 doxygen
 rsync -P -z --delete -r API web.sf.net:/home/project-web/scidavis/htdocs
