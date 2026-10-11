@@ -34,6 +34,7 @@
 
 #include <qwt_painter.h>
 #include <qwt_text.h>
+#include <QRegularExpression>
 
 ScaleDraw::ScaleDraw(const QString &s)
     : formula_string(s), d_fmt('g'), d_prec(4), d_minTicks(Out), d_majTicks(Out)
@@ -300,9 +301,11 @@ QwtText QwtSupersciptsScaleDraw::label(double value) const
     int prec;
     labelFormat(f, prec);
 
-    QString txt = QLocale().toString(transformValue(value), 'e', prec);
-    QStringList list = txt.split("e", Qt::SkipEmptyParts);
-    if (list[0].toDouble() == 0.0)
+    const QLocale locale;
+    QString txt = locale.toString(transformValue(value), 'e', prec);
+    // the exponent character depends on the locale ("e" for C, "E" for most languages)
+    QStringList list = txt.split(QRegularExpression("[eE]"), Qt::SkipEmptyParts);
+    if (list.size() < 2 || locale.toDouble(list[0]) == 0.0)
         return QString("0");
 
     QString s = list[1];

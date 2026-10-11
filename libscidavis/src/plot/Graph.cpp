@@ -138,6 +138,19 @@ Graph::Graph(QWidget *parent, QString name, Qt::WindowFlags f) : QWidget(parent,
     }
 
     d_plot = new Plot(this);
+    // The plot is document content: give it a fixed black on white palette, so that axes,
+    // titles and legends neither follow the interface theme on screen nor in exported images
+    // (colors chosen by the user are set on top of it). It is set on every part of the plot:
+    // with an application style sheet, Qt takes unset colors from the application palette
+    // instead of the parent widget.
+    const QPalette documentPalette(QColor(Qt::black), QColor(Qt::white), QColor(Qt::white),
+                                   QColor(Qt::darkGray), QColor(Qt::gray), QColor(Qt::black),
+                                   QColor(Qt::white), QColor(Qt::white), QColor(Qt::white));
+    d_plot->setPalette(documentPalette);
+    d_plot->canvas()->setPalette(documentPalette);
+    d_plot->titleLabel()->setPalette(documentPalette);
+    for (int axis = 0; axis < QwtPlot::axisCnt; axis++)
+        d_plot->axisWidget(axis)->setPalette(documentPalette);
     cp = new CanvasPicker(this);
 
     titlePicker = new TitlePicker(d_plot);
@@ -652,11 +665,10 @@ void Graph::showAxis(int axis, AxisType type, const QString &formatInfo, Table *
         return;
 
     scale->setMargin(baselineDist);
+    // always set (not only when different), so the colors are explicit and stay fixed
     QPalette pal = scale->palette();
-    if (pal.color(QPalette::Active, QPalette::WindowText) != c)
-        pal.setColor(QPalette::WindowText, c);
-    if (pal.color(QPalette::Active, QPalette::Text) != labelsColor)
-        pal.setColor(QPalette::Text, labelsColor);
+    pal.setColor(QPalette::WindowText, c);
+    pal.setColor(QPalette::Text, labelsColor);
     scale->setPalette(pal);
 
     if (!labelsOn)

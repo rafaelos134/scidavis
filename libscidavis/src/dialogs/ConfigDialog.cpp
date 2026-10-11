@@ -967,19 +967,24 @@ void ConfigDialog::languageChange()
             tr("Use group separator", "option: use separator every 3 digits"));
     lblAppPrecision->setText(tr("Default Number of Decimal Digits"));
     lblDecimalSeparator->setText(tr("Decimal Separators"));
+    // items in the order of ApplicationWindow::NumberFormat; keep a pending choice when the
+    // texts are refreshed after a language change
+    const int format = boxDecimalSeparator->currentIndex() >= 0 ? boxDecimalSeparator->currentIndex()
+                                                                  : app->d_number_format;
+    boxDecimalSeparator->blockSignals(true);
     boxDecimalSeparator->clear();
-    boxDecimalSeparator->addItem(tr("default") + " (" + QLocale::system().toString(1000.0, 'f', 1)
-                                 + ")");
-    boxDecimalSeparator->addItem(QLocale::c().toString(1000.0, 'f', 1));
-    boxDecimalSeparator->addItem(QLocale(QLocale::German).toString(1000.0, 'f', 1));
-    boxDecimalSeparator->addItem(QLocale(QLocale::French).toString(1000.0, 'f', 1));
-
-    if (QLocale().name() == QLocale::c().name())
-        boxDecimalSeparator->setCurrentIndex(1);
-    else if (QLocale().name() == QLocale(QLocale::German).name())
-        boxDecimalSeparator->setCurrentIndex(2);
-    else if (QLocale().name() == QLocale(QLocale::French).name())
-        boxDecimalSeparator->setCurrentIndex(3);
+    boxDecimalSeparator->addItem(
+            tr("Same as the language") + " ("
+            + ApplicationWindow::numberFormatLocale(ApplicationWindow::LanguageNumbers,
+                                                    app->appLanguage)
+                      .toString(1000.0, 'f', 1)
+            + ")");
+    for (int f : { ApplicationWindow::DotNumbers, ApplicationWindow::CommaNumbers,
+                   ApplicationWindow::CommaSpaceNumbers })
+        boxDecimalSeparator->addItem(
+                ApplicationWindow::numberFormatLocale(f, app->appLanguage).toString(1000.0, 'f', 1));
+    boxDecimalSeparator->setCurrentIndex(format);
+    boxDecimalSeparator->blockSignals(false);
 
     boxSeparatorPreview->setText(
             tr("Preview:", "preview of the decimal separator") + " "
@@ -1161,37 +1166,14 @@ void ConfigDialog::apply()
 
     // general page: numeric format tab
     app->d_decimal_digits = boxAppPrecision->value();
-    QLocale locale;
-    switch (boxDecimalSeparator->currentIndex()) {
-    case 0:
-        locale = QLocale::system();
-        break;
-    case 1:
-        locale = QLocale::c();
-        break;
-    case 2:
-        locale = QLocale(QLocale::German);
-        break;
-    case 3:
-        locale = QLocale(QLocale::French);
-        break;
-    }
-
     int currentBoxIndex = boxDefaultNumericFormat->currentIndex();
     if (currentBoxIndex > -1) {
         app->d_default_numeric_format =
                 boxDefaultNumericFormat->itemData(currentBoxIndex).toChar().toLatin1();
     }
 
-    if (boxUseGroupSeparator->isChecked())
-        locale.setNumberOptions(locale.numberOptions() & ~QLocale::OmitGroupSeparator);
-    else
-        locale.setNumberOptions(locale.numberOptions() | QLocale::OmitGroupSeparator);
-
-    if (QLocale() != locale) {
-        QLocale::setDefault(locale);
-        app->localeChanged();
-    }
+    app->d_number_format = boxDecimalSeparator->currentIndex();
+    app->applyNumberFormat(boxUseGroupSeparator->isChecked());
 
     // general page: confirmations tab
     app->confirmCloseFolder = boxFolders->isChecked();
@@ -1593,21 +1575,9 @@ void ConfigDialog::showPointsBox(bool)
 
 void ConfigDialog::updateDecSepPreview()
 {
-    QLocale locale;
-    switch (boxDecimalSeparator->currentIndex()) {
-    case 0:
-        locale = QLocale::system();
-        break;
-    case 1:
-        locale = QLocale::c();
-        break;
-    case 2:
-        locale = QLocale(QLocale::German);
-        break;
-    case 3:
-        locale = QLocale(QLocale::French);
-        break;
-    }
+    ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+    QLocale locale = ApplicationWindow::numberFormatLocale(boxDecimalSeparator->currentIndex(),
+                                                           app->appLanguage);
 
     if (boxUseGroupSeparator->isChecked())
         locale.setNumberOptions(locale.numberOptions() & ~QLocale::OmitGroupSeparator);

@@ -172,6 +172,18 @@ public:
     // from ConfigDialog.
     void localeChanged();
 
+    //! How numbers are written (decimal and group separators)
+    enum NumberFormat {
+        LanguageNumbers = 0, //!< as usual for the interface language (pt: 1.000,5; en: 1,000.5)
+        DotNumbers, //!< 1,000.5
+        CommaNumbers, //!< 1.000,5
+        CommaSpaceNumbers //!< 1 000,5
+    };
+    //! Number locale of a NumberFormat for the given interface language (e.g. "pt-br")
+    static QLocale numberFormatLocale(int format, const QString &language);
+    //! Make d_number_format (with or without group separators) the default locale
+    void applyNumberFormat(bool groupSeparator);
+
 public slots:
     //! Copy the status bar text to the clipboard
     void copyStatusBarText();
@@ -993,6 +1005,8 @@ public:
 
     //! default precision to be used for all other operations than fitting
     int d_decimal_digits;
+    //! One of NumberFormat
+    int d_number_format = LanguageNumbers;
 
     char d_default_numeric_format;
 

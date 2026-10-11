@@ -3442,6 +3442,10 @@ Os seguintes códigos podem ser usados:
         <translation>Sistema</translation>
     </message>
     <message>
+        <source>Same as the language</source>
+        <translation>Igual ao idioma</translation>
+    </message>
+    <message>
         <source>Light</source>
         <translation>Claro</translation>
     </message>

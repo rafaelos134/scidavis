@@ -142,6 +142,7 @@
 #include <QFile>
 #include <QStyle>
 #include <QStyleFactory>
+#include <QStyleHints>
 #include <QVarLengthArray>
 #include <QList>
 #include <QUrl>
@@ -222,6 +223,9 @@ ApplicationWindow::ApplicationWindow()
     // apply the theme before any widget is created, so that everything starts with its colors
     appTheme = getSettings().value("/General/Theme", "system").toString();
     applyThemePalette();
+    // the System theme follows the platform; Theme updates the palette, update the workspace
+    connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this,
+            [this] { applyWorkspaceColors(); });
 
     initFonts();
     QPixmapCache::setCacheLimit(20 * QPixmapCache::cacheLimit());
@@ -4087,13 +4091,21 @@ void ApplicationWindow::readSettings()
     autoSaveTime = settings.value("/AutoSaveTime", 15).toInt();
     defaultScriptingLang = settings.value("/ScriptingLang", "muParser").toString();
 
-    QLocale temp_locale = QLocale(settings.value("/Locale", QLocale::system().name()).toString());
-    bool usegl = settings.value("/LocaleUseGroupSeparator", true).toBool();
-    if (usegl)
-        temp_locale.setNumberOptions(temp_locale.numberOptions() & ~QLocale::OmitGroupSeparator);
-    else
-        temp_locale.setNumberOptions(temp_locale.numberOptions() | QLocale::OmitGroupSeparator);
-    QLocale::setDefault(temp_locale);
+    if (settings.contains("/NumberFormat"))
+        d_number_format = settings.value("/NumberFormat").toInt();
+    else {
+        // older versions stored the locale itself; keep explicit separator choices
+        const QString old_locale = settings.value("/Locale").toString();
+        if (old_locale == QLocale::c().name())
+            d_number_format = DotNumbers;
+        else if (old_locale == QLocale(QLocale::German).name())
+            d_number_format = CommaNumbers;
+        else if (old_locale == QLocale(QLocale::French).name())
+            d_number_format = CommaSpaceNumbers;
+        else
+            d_number_format = LanguageNumbers;
+    }
+    applyNumberFormat(settings.value("/LocaleUseGroupSeparator", true).toBool());
 
     d_decimal_digits = settings.value("/DecimalDigits", 6).toInt();
     d_default_numeric_format = settings.value("/DefaultNumericFormat", 'g').toChar().toLatin1();
@@ -4353,7 +4365,8 @@ void ApplicationWindow::saveSettings()
     settings.setValue("/AutoSaveTime", autoSaveTime);
     settings.setValue("/UndoLimit", undoLimit);
     settings.setValue("/ScriptingLang", defaultScriptingLang);
-    settings.setValue("/Locale", QLocale().name());
+    settings.setValue("/NumberFormat", d_number_format);
+    settings.setValue("/Locale", QLocale().name()); // read by older versions
     settings.setValue("/LocaleUseGroupSeparator",
                       bool(!(QLocale().numberOptions() & QLocale::OmitGroupSeparator)));
     settings.setValue("/DecimalDigits", d_decimal_digits);
@@ -11721,6 +11734,10 @@ void ApplicationWindow::switchToLanguage(const QString &locale)
             qtTranslator->load("qt_" + appLanguage);
     }
     insertTranslatedStrings();
+
+    // numbers written as usual for the new language, unless a format was chosen explicitly
+    if (d_number_format == LanguageNumbers)
+        applyNumberFormat(!(QLocale().numberOptions() & QLocale::OmitGroupSeparator));
 }
 
 QStringList ApplicationWindow::matrixNames()
@@ -13511,6 +13528,39 @@ QSettings &ApplicationWindow::getSettings()
 
 // initialize singleton
 static auto &SciDavisSettingsSingleton = ApplicationWindow::getSettings();
+
+QLocale ApplicationWindow::numberFormatLocale(int format, const QString &language)
+{
+    switch (format) {
+    case DotNumbers:
+        return QLocale::c();
+    case CommaNumbers:
+        return QLocale(QLocale::German);
+    case CommaSpaceNumbers:
+        return QLocale(QLocale::French);
+    default: {
+        // translation names look like "pt-br" or "cs-alt"; QLocale wants "pt_BR" or "cs"
+        QString name = language.section('-', 0, 0);
+        const QString region = language.section('-', 1, 1);
+        if (region.size() == 2)
+            name += "_" + region.toUpper();
+        return QLocale(name);
+    }
+    }
+}
+
+void ApplicationWindow::applyNumberFormat(bool groupSeparator)
+{
+    QLocale locale = numberFormatLocale(d_number_format, appLanguage);
+    if (groupSeparator)
+        locale.setNumberOptions(locale.numberOptions() & ~QLocale::OmitGroupSeparator);
+    else
+        locale.setNumberOptions(locale.numberOptions() | QLocale::OmitGroupSeparator);
+    if (QLocale() != locale) {
+        QLocale::setDefault(locale);
+        localeChanged();
+    }
+}
 
 void ApplicationWindow::localeChanged()
 {
