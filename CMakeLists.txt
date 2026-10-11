@@ -98,16 +98,14 @@ option( SCRIPTING_PYTHON "Enable Python Scripting" OFF )
 option( BUILD_TESTS "Build tests" OFF )
 
 if( SCRIPTING_PYTHON )
-  # The SIP bindings (libscidavis/src/scripting/scidavis.sip, cmake/FindPyQt.cmake) and the
-  # Python modules (scidavis/scidavisrc.py, scidavisUtil.py) still target PyQt5. They need a
-  # PyQt6 built against the same Qt 6 installation as SciDAVis before this can be enabled again.
-  message( FATAL_ERROR "SCRIPTING_PYTHON is not yet ported to Qt 6 / PyQt6. "
-    "Configure with -DSCRIPTING_PYTHON=OFF." )
+  # Needs SIP 6 and a PyQt6 built against the same Qt 6 installation as SciDAVis (the PyQt6
+  # wheels from PyPI bundle their own Qt and cannot be loaded into SciDAVis). Point
+  # Python3_EXECUTABLE to the Python that has this PyQt6 installed, e.g. a virtual environment.
   if( MINGW )
     set( Python3_FIND_REGISTRY LAST )
   endif()
   find_package( Python3 COMPONENTS Interpreter Development REQUIRED )
-  find_package( SIP REQUIRED )
+  find_package( SIP 6 REQUIRED )
   find_package( PyQt REQUIRED )
 endif()
 

@@ -35,10 +35,8 @@
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
 
-%If (Qt_5_0_0 -)
 %Import QtWidgets/QtWidgetsmod.sip
 %Import QtPrintSupport/QtPrintSupportmod.sip
-%End
 
 %ModuleHeaderCode
 #if PY_MAJOR_VERSION >= 3
@@ -208,7 +206,7 @@ class Column: AbstractAspect
 		void replaceDateTimes(int first, const QList<QDateTime>& new_values);
 		double valueAt(int row) const;
 		void setValueAt(int row, double new_value);
-		void replaceValues(int first, const QVector<qreal>& new_values);
+		void replaceValues(int first, const QList<qreal>& new_values);
 
   Column * x() const;
 %MethodCode
@@ -251,7 +249,7 @@ class MyWidget: QMdiSubWindow /PyName=MDIWindow/
 #include "ApplicationWindow.h"
 %End
 public:
-  enum CaptionPolicy{Name = 0, Label = 1, Both = 2};
+  enum CaptionPolicy /BaseType=IntEnum/ {Name = 0, Label = 1, Both = 2};
 
   SIP_PYOBJECT windowLabel();
 %MethodCode
@@ -274,6 +272,11 @@ public:
 
   CaptionPolicy captionPolicy();
   void setCaptionPolicy(CaptionPolicy);
+  // PyQt6/SIP 6 enums do not accept plain ints; these overloads keep older scripts working
+  void setCaptionPolicy(int);
+%MethodCode
+  sipCpp->setCaptionPolicy(static_cast<MyWidget::CaptionPolicy>(a0));
+%End
 
   // not usable as is - doesn't yield a valid template file,
   // geometry info has to be supplied by user, doesn't work on graphs (where it's most
@@ -545,19 +548,19 @@ public:
 		sipCpp->setCell(row, col, a2);
 %End
 
-	QVector<qreal> column(int col, int first_row, int last_row);
+	QList<qreal> column(int col, int first_row, int last_row);
 %MethodCode
-	sipRes = new QVector<qreal>(sipCpp->d_future_matrix->columnCells(a0, a1, a2));
+	sipRes = new QList<qreal>(sipCpp->d_future_matrix->columnCells(a0, a1, a2));
 %End
-	void setColumn(int col, int first_row, const QVector<qreal> &values);
+	void setColumn(int col, int first_row, const QList<qreal> &values);
 %MethodCode
 	sipCpp->d_future_matrix->setColumnCells(a0, a1, a1+a2->size()-1, *a2);
 %End
-	QVector<qreal> row(int row, int first_column, int last_column);
+	QList<qreal> row(int row, int first_column, int last_column);
 %MethodCode
-	sipRes = new QVector<qreal>(sipCpp->d_future_matrix->rowCells(a0, a1, a2));
+	sipRes = new QList<qreal>(sipCpp->d_future_matrix->rowCells(a0, a1, a2));
 %End
-	void setRow(int row, int first_column, const QVector<qreal> & values);
+	void setRow(int row, int first_column, const QList<qreal> & values);
 %MethodCode
 	sipCpp->d_future_matrix->setRowCells(a0, a1, a1+a2->size()-1, *a2);
 %End
@@ -650,7 +653,7 @@ class QwtSymbol
 #include "ColorButton.h"
 %End
 	public:
-    enum Style 
+    enum Style /BaseType=IntEnum/
     { 
         NoSymbol = -1, 
 
@@ -683,6 +686,11 @@ class QwtSymbol
     void setBrush(const QBrush& b);
     void setPen(const QPen &p);
     void setStyle (Style s);
+    // PyQt6/SIP 6 enums do not accept plain ints; these overloads keep older scripts working
+    void setStyle(int s);
+%MethodCode
+    sipCpp->setStyle(static_cast<QwtSymbol::Style>(a0));
+%End
 
     const QBrush& brush() const;
     const QPen& pen() const;
@@ -831,7 +839,7 @@ class QwtPlot {
 #include <qwt_plot.h>
 %End
 	public:
-  enum Axis 
+  enum Axis /BaseType=IntEnum/
   { 
   	yLeft,
   	yRight,
@@ -917,7 +925,7 @@ class Graph : QWidget /PyName=Layer/
 #include <qwt_plot_canvas.h>
 %End
 public:
-  enum Axis{Left, Right, Bottom, Top};
+  enum Axis /BaseType=IntEnum/ {Left, Right, Bottom, Top};
   bool isPiePlot();
   SIP_PYOBJECT pieLegendText() /PyName=pieLegend/;
 %MethodCode
@@ -1341,8 +1349,8 @@ class Fit : QObject
 #include "Fit.h"
 %End
 public:
-  enum Algorithm{ScaledLevenbergMarquardt, UnscaledLevenbergMarquardt, NelderMeadSimplex};
-  enum ErrorSource {UnknownErrors, AssociatedErrors, PoissonErrors, CustomErrors};
+  enum Algorithm /BaseType=IntEnum/ {ScaledLevenbergMarquardt, UnscaledLevenbergMarquardt, NelderMeadSimplex};
+  enum ErrorSource /BaseType=IntEnum/ {UnknownErrors, AssociatedErrors, PoissonErrors, CustomErrors};
 
   Fit(ApplicationWindow* /TransferThis/, Graph*=0, const char*=0);
   ~Fit();
@@ -1350,6 +1358,11 @@ public:
   virtual void fit();
 
   bool setYErrorSource(ErrorSource err, const QString& colName = QString());
+  // PyQt6/SIP 6 enums do not accept plain ints; these overloads keep older scripts working
+  bool setYErrorSource(int err, const QString& colName = QString());
+%MethodCode
+  sipRes = sipCpp->setYErrorSource(static_cast<Fit::ErrorSource>(a0), *a1);
+%End
 
   bool setDataFromCurve(const QString&, Graph*=0);
 
@@ -1385,6 +1398,11 @@ delete values;
   virtual void guessInitialValues();
 
   void setAlgorithm(Algorithm);
+  // PyQt6/SIP 6 enums do not accept plain ints; these overloads keep older scripts working
+  void setAlgorithm(int);
+%MethodCode
+  sipCpp->setAlgorithm(static_cast<Fit::Algorithm>(a0));
+%End
 
   void setTolerance(double);
 
@@ -1609,7 +1627,7 @@ class MultiPeakFit : Fit
 #include "MultiPeakFit.h"
 %End
 public:
-  enum PeakProfile{Gauss, Lorentz};
+  enum PeakProfile /BaseType=IntEnum/ {Gauss, Lorentz};
   MultiPeakFit(ApplicationWindow * /TransferThis/, Graph *, PeakProfile=Gauss, int=1);
 
   int peaks() /PyName=numPeaks/;
@@ -1619,6 +1637,11 @@ public:
   void setPeakCurvesColor(int);
 
   static QString generateFormula(int, PeakProfile);
+  // PyQt6/SIP 6 enums do not accept plain ints; these overloads keep older scripts working
+  static QString generateFormula(int, int);
+%MethodCode
+  sipRes = new QString(MultiPeakFit::generateFormula(a0, static_cast<MultiPeakFit::PeakProfile>(a1)));
+%End
   static QStringList generateParameterList(int);
 };
 
@@ -1756,9 +1779,14 @@ public:
   SIPSCIDAVIS_APP(new sipIntegration(app, a0, *a1, a2, a3))
 %End
 
-	enum InterpolationMethod{Linear, Cubic, Akima};
+	enum InterpolationMethod /BaseType=IntEnum/ {Linear, Cubic, Akima};
 	InterpolationMethod method();
     void setMethod(InterpolationMethod method);
+    // PyQt6/SIP 6 enums do not accept plain ints; these overloads keep older scripts working
+    void setMethod(int method);
+%MethodCode
+    sipCpp->setMethod(static_cast<Integration::InterpolationMethod>(a0));
+%End
 
   bool run();
 
@@ -1771,7 +1799,7 @@ class Interpolation : Filter
 #include "Interpolation.h"
 %End
 public:
-  enum InterpolationMethod{Linear, Cubic, Akima};
+  enum InterpolationMethod /BaseType=IntEnum/ {Linear, Cubic, Akima};
 
   Interpolation(ApplicationWindow * /TransferThis/, Graph *, const QString&, int=0);
   Interpolation(ApplicationWindow * /TransferThis/, Graph *, const QString&, double, double, int=0);
@@ -1795,7 +1823,7 @@ class SmoothFilter : Filter
 #include "SmoothFilter.h"
 %End
 public:
-  enum SmoothMethod{SavitzkyGolay = 1, FFT = 2, Average = 3};
+  enum SmoothMethod /BaseType=IntEnum/ {SavitzkyGolay = 1, FFT = 2, Average = 3};
 
   SmoothFilter(ApplicationWindow * /TransferThis/, Graph *, const QString&, int=3);
   SmoothFilter(ApplicationWindow * /TransferThis/, Graph *, const QString&, double, double, int=3);
@@ -1823,7 +1851,7 @@ class FFTFilter : Filter
 #include "FFTFilter.h"
 %End
 public:
-  enum FilterType{LowPass = 1, HighPass = 2, BandPass = 3, BandBlock = 4};
+  enum FilterType /BaseType=IntEnum/ {LowPass = 1, HighPass = 2, BandPass = 3, BandBlock = 4};
 
   FFTFilter(ApplicationWindow * /TransferThis/, Graph *, const QString&, int=1);
   FFTFilter(ApplicationWindow * /TransferThis/, Graph *, const QString&, double, double, int=1);

@@ -13,3 +13,4 @@ build-compiletest/
 CMakeLists.txt.user*
 
 aqtinstall.log
+__pycache__/

@@ -214,12 +214,12 @@ def exportTableToTeX(t, filename=None):
 		exportToTeX(table, filename=None):
 		Export table as TeX-tabular to filename. If filename==None, popup a file selection dialog.
 	"""
-	if (scidavis.app.qtVersion() >= 0x050000):
-		from PyQt5.QtWidgets import QFileDialog
-	else:
-		from PyQt4.QtGui import QFileDialog
+	from PyQt6.QtWidgets import QFileDialog
 	if not filename:
-		filename=QFileDialog.getSaveFileName(scidavis.app,"SciDAVis - Export TeX table","","All files *;;TeX documents (*.tex *.TEX);;");
+		# getSaveFileName() returns (file name, selected filter)
+		filename=QFileDialog.getSaveFileName(scidavis.app,"SciDAVis - Export TeX table","","All files *;;TeX documents (*.tex *.TEX);;")[0]
+		if not filename:
+			return
 	f=open(filename,'w')
 	f.write('\\begin{tabular}{|' + 'c|'*t.numCols() + '}\\hline\n')
 	for col in range(1,t.numCols()):

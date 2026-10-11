@@ -33,6 +33,7 @@
 #include <Python.h>
 
 #include "PythonScript.h"
+#include "PythonGilLock.h"
 #include "PythonScripting.h"
 #include "ApplicationWindow.h"
 
@@ -94,6 +95,7 @@ PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *c
 
 PythonScript::~PythonScript()
 {
+    PythonGilLock gil;
     Py_DECREF(modLocalDict);
     Py_DECREF(modGlobalDict);
     Py_XDECREF(PyCode);
@@ -107,6 +109,7 @@ void PythonScript::setContext(QObject *context)
 
 bool PythonScript::compile(bool for_eval)
 {
+    PythonGilLock gil;
     hasOldGlobals = Code.contains("\nglobal ") || (0 == Code.indexOf("global "));
     PyObject *topLevelLocal = hasOldGlobals ? modLocalDict : modGlobalDict;
 
@@ -202,6 +205,7 @@ bool PythonScript::compile(bool for_eval)
 
 QVariant PythonScript::eval()
 {
+    PythonGilLock gil;
     if (!isFunction)
         compiled = notCompiled;
     if (compiled != isCompiled && !compile(true))
@@ -279,6 +283,7 @@ QVariant PythonScript::eval()
 
 bool PythonScript::exec()
 {
+    PythonGilLock gil;
     if (isFunction)
         compiled = notCompiled;
     if (compiled != Script::isCompiled && !compile(false))
@@ -312,6 +317,7 @@ bool PythonScript::exec()
 
 void PythonScript::beginStdoutRedirect()
 {
+    PythonGilLock gil;
     if (!batchMode) {
         stdoutSave = PyDict_GetItemString(env()->sysDict(), "stdout");
         Py_XINCREF(stdoutSave);
@@ -324,6 +330,7 @@ void PythonScript::beginStdoutRedirect()
 
 void PythonScript::endStdoutRedirect()
 {
+    PythonGilLock gil;
     if (!batchMode && env()) {
         PyDict_SetItemString(env()->sysDict(), "stdout", stdoutSave);
         Py_XDECREF(stdoutSave);

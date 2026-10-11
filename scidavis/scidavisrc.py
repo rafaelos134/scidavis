@@ -55,14 +55,32 @@ def import_to_global(modname, attrs=None, math=False):
 import_to_global("math", None, True)
 
 # make Qt API available (it gets imported in any case by the scidavis module)
-global QtGui, QtCore, Qt
-if (scidavis.app.qtVersion() >= 0x050000):
-	global QtWidgets
-	from PyQt5 import QtGui, QtWidgets, QtCore
-	from PyQt5.QtCore import Qt
-else:
-	from PyQt4 import QtGui, QtCore
-	from PyQt4.QtCore import Qt
+global QtGui, QtCore, QtWidgets, Qt
+from PyQt6 import QtGui, QtWidgets, QtCore
+from PyQt6.QtCore import Qt
+
+def _add_unscoped_enum_names(*modules):
+	"""
+		PyQt6 only accepts fully scoped enum names (Qt.GlobalColor.red); PyQt5 also accepted
+		Qt.red. Add the short names again, so that scripts written for older SciDAVis versions
+		keep working. Existing attributes are never overwritten.
+	"""
+	import enum
+	for module in modules:
+		for cls in [getattr(module, n) for n in dir(module)]:
+			if not isinstance(cls, type):
+				continue
+			for enum_name in dir(cls):
+				scoped = getattr(cls, enum_name, None)
+				if isinstance(scoped, type) and issubclass(scoped, enum.Enum):
+					for member in scoped:
+						if not hasattr(cls, member.name):
+							try:
+								setattr(cls, member.name, member)
+							except (AttributeError, TypeError):
+								pass
+
+_add_unscoped_enum_names(QtCore, QtGui, QtWidgets, __main__.scidavis)
 print("Using Qt", QtCore.QT_VERSION_STR)
 
 # import SciDAVis' classes to the global namespace (particularly useful for fits)
@@ -216,7 +234,7 @@ try:
 	import_to_global("scipy.special", special_functions, True)
 	have_scipy = True
 	print("Loaded %d special functions from scipy.special." % len(special_functions))
-except(ImportError): pass
+except Exception: pass
 
 # Import selected parts of pygsl.sf (if available) into global namespace.
 # See pygsl.sourceforge.net for information on pygsl and how to get it.
@@ -331,4 +349,4 @@ try:
 	else:
 		import_to_global("pygsl.sf", special_functions_doublets, True)
 		print("Loaded %d special functions from pygsl.sf." % (len(special_functions) + len(special_functions_doublets)))
-except(ImportError): pass
+except Exception: pass

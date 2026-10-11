@@ -36,7 +36,7 @@ C++20 com Qt 6 (6.8 LTS). Roda em Linux, Windows e macOS.
 | **Ajuste de curvas (fit)** | Linear, polinomial, exponencial (1, 2 e 3 termos), sigmoidal (Boltzmann), Gauss, Lorentz, multi-picos, função definida pelo usuário e plugins | `analysis/fit/` |
 | **Análise numérica** | Derivada, integral, interpolação, suavização, FFT, filtros FFT, convolução/deconvolução, correlação | `analysis/` |
 | **Estatística** | Estatísticas de linhas/colunas (média, desvio-padrão, variância, soma, min/max) | `project/TableStatistics.*` |
-| **Scripting** | Fórmulas com muParser; scripts Python (SIP/PyQt) ainda não disponíveis no Qt 6 | `scripting/` |
+| **Scripting** | Fórmulas com muParser e scripts Python (PyQt6 via SIP 6, opcional) | `scripting/` |
 | **Notas** | Janelas de texto/script dentro do projeto | `project/Note.*` |
 | **Importar/Exportar** | ASCII/CSV, projetos do Origin (`.opj`), tabelas em LaTeX, exportação de imagens (PNG, SVG, PDF, EPS…) | `io/`, `dialogs/ImportASCIIDialog.*`, `dialogs/ImageExportDialog.*` |
 | **Projetos** | Arquivo `.sciprj` com pastas, tabelas, matrizes, gráficos e notas | `app/ApplicationWindow.*`, `project/Folder.*`, `future/core/Project.*` |
@@ -144,7 +144,7 @@ libscidavis/src/
 |---|---|
 | `ScriptingEnv.*`, `Script.*` | Interface abstrata de linguagem de script. |
 | `MuParserScripting.*`, `MuParserScript.*` | Avaliador de fórmulas muParser; tabela de funções embutidas (`math_functions[]`) e funções `col()`, `cell()` etc. |
-| `PythonScripting.*`, `PythonScript.*` | Interpretador Python embutido (opcional; ainda não portado para Qt 6, ver seção 6). |
+| `PythonScripting.*`, `PythonScript.*`, `PythonGilLock.h` | Interpretador Python embutido (opcional, `-DSCRIPTING_PYTHON=ON`, ver seção 6). |
 | `scidavis.sip`, `project.py`, `pyproject.toml` | Definição dos bindings Python gerados pelo SIP. |
 | `MyParser.*` | Avaliador muParser simples usado em diálogos (ex.: limites de função). |
 | `ScriptEdit.*` | Editor de texto usado em notas e no "Set Column Values". |
@@ -295,9 +295,31 @@ cmake -S . -B build -DBUILD_TESTS=ON && cmake --build build -j$(nproc)
 cd build && ctest --output-on-failure        # em servidor sem tela: xvfb-run ctest ...
 ```
 
-Opções do CMake: `SCRIPTING_MUPARSER` (ON), `ORIGIN_IMPORT` (OFF), `BUILD_TESTS` (OFF),
-`SEARCH_FOR_UPDATES` (ON), `DOWNLOAD_LINKS` (ON). `SCRIPTING_PYTHON` ainda **não** foi
-portado para Qt 6/PyQt6 e gera erro se ativado.
+Opções do CMake: `SCRIPTING_MUPARSER` (ON), `SCRIPTING_PYTHON` (OFF), `ORIGIN_IMPORT` (OFF),
+`BUILD_TESTS` (OFF), `SEARCH_FOR_UPDATES` (ON), `DOWNLOAD_LINKS` (ON).
+
+### Scripts em Python (opcional)
+
+Precisam de SIP 6 e de um **PyQt6 compilado contra o mesmo Qt** do SciDAVis. Os pacotes
+`PyQt6` do PyPI trazem uma cópia própria do Qt e travam se carregados dentro do SciDAVis.
+Exemplo com um ambiente virtual (a compilação do PyQt6 leva de 30 a 60 minutos):
+
+```bash
+python3 -m venv --system-site-packages ~/Qt/pyqt6-venv
+~/Qt/pyqt6-venv/bin/pip install "sip>=6.8" "PyQt-builder>=1.16" "PyQt6-sip>=13.8"
+# baixe e extraia o código-fonte do PyQt6 6.8 (pyqt6-6.8.1.tar.gz no PyPI) e, dentro dele:
+~/Qt/pyqt6-venv/bin/sip-install --qmake ~/Qt/6.8.3/gcc_64/bin/qmake --confirm-license \
+    --no-designer-plugin --no-qml-plugin --no-dbus-python --jobs 4 \
+    --enable QtCore --enable QtGui --enable QtWidgets --enable QtPrintSupport --enable QtSvg
+
+cmake -S . -B build -DCMAKE_PREFIX_PATH=$HOME/Qt/6.8.3/gcc_64 -DSCRIPTING_PYTHON=ON \
+      -DPython3_EXECUTABLE=$HOME/Qt/pyqt6-venv/bin/python
+```
+
+O `site-packages` desse Python é adicionado ao `sys.path` do interpretador embutido. Scripts
+escritos para versões anteriores continuam funcionando: `scidavisrc.py` repõe os nomes curtos
+dos enums que o PyQt6 removeu (`Qt.red` além de `Qt.GlobalColor.red`), e os métodos do
+SciDAVis que recebem enums continuam aceitando números inteiros.
 
 ### Notas da migração para Qt 6
 

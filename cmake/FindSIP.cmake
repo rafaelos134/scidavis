@@ -23,12 +23,15 @@
 
 if( SIP_DIR )
   find_program( SIP_EXECUTABLE
-    NAMES sip-build sip
-    PATHS SIP_DIR
+    NAMES sip-build
+    PATHS ${SIP_DIR}
     )
 else()
+  # prefer the sip-build installed next to the selected Python (e.g. in a virtual environment)
+  get_filename_component( _Python3_BIN_DIR "${Python3_EXECUTABLE}" DIRECTORY )
   find_program( SIP_EXECUTABLE
-    NAMES sip-build sip
+    NAMES sip-build
+    HINTS ${_Python3_BIN_DIR}
     )
   get_filename_component( SIP_DIR ${SIP_EXECUTABLE} DIRECTORY CACHE )
 endif()

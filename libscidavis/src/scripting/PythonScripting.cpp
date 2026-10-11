@@ -59,6 +59,7 @@ typedef struct _traceback
 
 #include "PythonScript.h"
 #include "PythonScripting.h"
+#include "PythonGilLock.h"
 #include "ApplicationWindow.h"
 
 #include <QObject>
@@ -66,6 +67,8 @@ typedef struct _traceback
 #include <QDir>
 #include <QDateTime>
 #include <QCoreApplication>
+
+#include <optional>
 
 // includes sip.h, which undefines Qt's "slots" macro since SIP 4.6
 #include "sipAPIscidavis.h"
@@ -107,6 +110,7 @@ QString PythonScripting::toString(PyObject *object, bool decref)
 
 PyObject *PythonScripting::eval(const QString &code, PyObject *argDict, const char *name)
 {
+    PythonGilLock gil;
     PyObject *args;
     if (argDict)
         args = argDict;
@@ -123,6 +127,7 @@ PyObject *PythonScripting::eval(const QString &code, PyObject *argDict, const ch
 
 bool PythonScripting::exec(const QString &code, PyObject *argDict, const char *name)
 {
+    PythonGilLock gil;
     PyObject *args;
     if (argDict)
         args = argDict;
@@ -142,6 +147,7 @@ bool PythonScripting::exec(const QString &code, PyObject *argDict, const char *n
 
 QString PythonScripting::errorMsg()
 {
+    PythonGilLock gil;
     PyObject *exception = 0, *value = 0, *traceback = 0;
     PyTracebackObject *excit = 0;
     PyFrameObject *frame;
@@ -205,6 +211,11 @@ PythonScripting::PythonScripting(ApplicationWindow *parent, bool batch)
     : ScriptingEnv(parent, langName)
 {
     Q_UNUSED(batch)
+    // A second environment is created from running Python code, e.g. by app.loadProject().
+    // PyQt6 releases the GIL around such calls into C++, so it has to be taken back here.
+    std::optional<PythonGilLock> gil;
+    if (Py_IsInitialized())
+        gil.emplace();
     PyObject *mainmod = NULL, *scidavismod = NULL, *sysmod = NULL;
     math = NULL;
     sys = NULL;
@@ -257,6 +268,13 @@ PythonScripting::PythonScripting(ApplicationWindow *parent, bool batch)
     }
     Py_INCREF(globals);
 
+#ifdef PYTHON_SITE_PATH
+    // site-packages of the Python SciDAVis was built against, which holds the matching PyQt6
+    // (e.g. a virtual environment, not on the default path of the embedded interpreter)
+    PyRun_SimpleString("import sys\nif '" PYTHON_SITE_PATH "' not in sys.path:\n"
+                       "    sys.path.append('" PYTHON_SITE_PATH "')");
+#endif
+
     math = PyDict_New();
     if (!math)
         PyErr_Print();
@@ -290,6 +308,7 @@ PythonScripting::PythonScripting(ApplicationWindow *parent, bool batch)
 
 void PythonScripting::redirectStdIO()
 {
+    PythonGilLock gil;
     // Redirect output to the print(const QString&) signal.
     // Also see method write(const QString&) and Python documentation on
     // sys.stdout and sys.stderr.
@@ -299,6 +318,7 @@ void PythonScripting::redirectStdIO()
 
 bool PythonScripting::initialize()
 {
+    PythonGilLock gil;
     if (!d_initialized)
         return false;
     //	PyEval_AcquireLock();
@@ -334,6 +354,7 @@ bool PythonScripting::initialize()
 
 PythonScripting::~PythonScripting()
 {
+    PythonGilLock gil;
     Py_XDECREF(globals);
     Py_XDECREF(math);
     Py_XDECREF(sys);
@@ -428,6 +449,7 @@ bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
 
 bool PythonScripting::setInt(int val, const char *name, PyObject *dict)
 {
+    PythonGilLock gil;
     PyObject *pyobj = Py_BuildValue("i", val);
     if (!pyobj)
         return false;
@@ -441,6 +463,7 @@ bool PythonScripting::setInt(int val, const char *name, PyObject *dict)
 
 bool PythonScripting::setDouble(double val, const char *name, PyObject *dict)
 {
+    PythonGilLock gil;
     PyObject *pyobj = Py_BuildValue("d", val);
     if (!pyobj)
         return false;
@@ -454,6 +477,7 @@ bool PythonScripting::setDouble(double val, const char *name, PyObject *dict)
 
 const QStringList PythonScripting::mathFunctions() const
 {
+    PythonGilLock gil;
     QStringList flist;
     PyObject *key, *value;
 #if PY_VERSION_HEX >= 0x02050000
@@ -470,6 +494,7 @@ const QStringList PythonScripting::mathFunctions() const
 
 const QString PythonScripting::mathFunctionDoc(const QString &name) const
 {
+    PythonGilLock gil;
     PyObject *mathf = PyDict_GetItemString(math, name.toLocal8Bit()); // borrowed
     if (!mathf)
         return "";

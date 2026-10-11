@@ -438,6 +438,7 @@ endif()
 
 if( SCRIPTING_PYTHON )
   target_compile_definitions( libscidavis PUBLIC
+    PYTHON_SITE_PATH="${Python3_SITEARCH}"
     PYTHON_CONFIG_PATH="${CMAKE_INSTALL_PREFIX}/etc"
     PYTHON_UTIL_PATH="${CMAKE_INSTALL_PREFIX}/share/scidavis"
     SCRIPTING_PYTHON
@@ -479,20 +480,14 @@ target_include_directories( libscidavis PUBLIC
 
 if( SCRIPTING_PYTHON )
 
-  if( SIP_VERSION VERSION_GREATER_EQUAL 5 )
-    set( scidavis_SIP_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/python/scidavis )
-  else()
-    set( scidavis_SIP_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR} )
-  endif()
+  set( scidavis_SIP_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/python/scidavis )
 
   set(scidavis_PyQt_HDR ${scidavis_SIP_OUTPUT_DIR}/sipAPIscidavis.h)
-  if( SIP_VERSION VERSION_GREATER_EQUAL 5 )
-    set( scidavis_SIP_HDR ${CMAKE_CURRENT_BINARY_DIR}/python/sip.h )
-    target_include_directories( libscidavis BEFORE PUBLIC
-      "${CMAKE_CURRENT_BINARY_DIR}/python"
-      "${scidavis_SIP_OUTPUT_DIR}"
-    )
-  endif()
+  set( scidavis_SIP_HDR ${CMAKE_CURRENT_BINARY_DIR}/python/sip.h )
+  target_include_directories( libscidavis BEFORE PUBLIC
+    "${CMAKE_CURRENT_BINARY_DIR}/python"
+    "${scidavis_SIP_OUTPUT_DIR}"
+  )
 
   set_source_files_properties(
     ${scidavis_PyQt_HDR}
@@ -557,38 +552,26 @@ if( SCRIPTING_PYTHON )
     GENERATED ON
     )
 
-  if( SIP_VERSION VERSION_GREATER_EQUAL 5 )
-    get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
-    add_custom_command(
-      OUTPUT ${scidavis_PyQt_HDR} ${scidavis_PyQt_SRC} ${scidavis_SIP_HDR}
-      COMMAND ${SIP_EXECUTABLE} --no-make --qmake=${_qmake_executable}
-        --include-dir=${PyQt_INCLUDE_DIRS}
-        --build-dir=${CMAKE_CURRENT_BINARY_DIR}/python
-      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/scripting/scidavis.sip
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/scripting
-      )
-  else()
-    add_custom_command(
-      OUTPUT ${scidavis_PyQt_HDR} ${scidavis_PyQt_SRC}
-      COMMAND ${SIP_EXECUTABLE} -c . -I${PyQt_INCLUDE_DIRS} ${PyQt_FLAGS}
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/scripting/scidavis.sip
-      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/scripting/scidavis.sip
-      )
-  endif()
+  get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
+  add_custom_command(
+    OUTPUT ${scidavis_PyQt_HDR} ${scidavis_PyQt_SRC} ${scidavis_SIP_HDR}
+    COMMAND ${SIP_EXECUTABLE} --no-make --qmake=${_qmake_executable}
+      --include-dir=${PyQt_INCLUDE_DIRS}
+      --build-dir=${CMAKE_CURRENT_BINARY_DIR}/python
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/scripting/scidavis.sip
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/scripting/project.py
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/scripting/pyproject.toml
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/scripting
+    )
 
-  if( SIP_VERSION VERSION_GREATER_EQUAL 5 )
-    add_custom_target(generate_PyQt_source
-      DEPENDS ${scidavis_PyQt_HDR} ${scidavis_PyQt_SRC} ${scidavis_SIP_HDR}
-      )
-  else()
-    add_custom_target(generate_PyQt_source
-      DEPENDS ${scidavis_PyQt_HDR} ${scidavis_PyQt_SRC}
-      )
-  endif()
+  add_custom_target(generate_PyQt_source
+    DEPENDS ${scidavis_PyQt_HDR} ${scidavis_PyQt_SRC} ${scidavis_SIP_HDR}
+    )
 
   target_sources( libscidavis PRIVATE
     "src/scripting/PythonScript.h"
     "src/scripting/PythonScripting.h"
+    "src/scripting/PythonGilLock.h"
     ${scidavis_PyQt_HDR}
     "src/scripting/PythonScript.cpp"
     "src/scripting/PythonScripting.cpp"
