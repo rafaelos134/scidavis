@@ -3,8 +3,9 @@
     Project              : SciDAVis
     --------------------------------------------------------------------
     Copyright            : (C) 2016 by Arun Narayanankutty
+                           (C) 2026 themed SVG icons
     Email                : n.arun.lifescience@gmail.com
-    Description          : Load icons
+    Description          : Load icons that follow the application palette
 
  ***************************************************************************/
 
@@ -27,60 +28,143 @@
  *                                                                         *
  ***************************************************************************/
 
-/* TODO:
-   1) use diffrent size icons 16x16, 22x22, 32x32 etc..(up to 64x64)
-   2) use only svg icons insted of xpm
-   3) use freedesktop icon naming when possible */
-
 #include "IconLoader.h"
 
+#include <QApplication>
 #include <QFile>
+#include <QHash>
+#include <QIconEngine>
+#include <QPainter>
+#include <QPalette>
+#include <QPixmapCache>
+#include <QSvgRenderer>
 #include <QtDebug>
 
-int IconLoader::lumen_;
-QList<int> IconLoader::sizes_;
-QList<QString> IconLoader::icon_path_;
+namespace {
 
-void IconLoader::init()
+const QString themedPath = QStringLiteral(":/themed/%1.svg");
+
+//! SVG sources, loaded once
+QByteArray svgSource(const QString &path)
 {
-    sizes_.clear();
-    sizes_ << 16 << 22 << 24;
-    icon_path_.clear();
-    icon_path_ << ":icons/dark"
-               << ":icons/light";
+    static QHash<QString, QByteArray> cache;
+    auto it = cache.find(path);
+    if (it == cache.end()) {
+        QFile file(path);
+        QByteArray data;
+        if (file.open(QIODevice::ReadOnly))
+            data = file.readAll();
+        // slightly lighter strokes than the 2px of the icon sources look better at 16-24px
+        data.replace("stroke-width=\"2\"", "stroke-width=\"1.75\"");
+        it = cache.insert(path, data);
+    }
+    return it.value();
 }
+
+/*!\brief Icon engine rendering a monochrome SVG in the colors of the current palette.
+ *
+ * "currentColor" in the SVG becomes the window text color (or the disabled/highlighted text
+ * color, depending on the icon mode) and "#ACCENT" the highlight color. Pixmaps are rendered
+ * on demand and cached per color, so icons follow theme changes without being recreated.
+ */
+class ThemedIconEngine : public QIconEngine
+{
+public:
+    explicit ThemedIconEngine(const QString &path) : d_path(path) { }
+
+    void paint(QPainter *painter, const QRect &rect, QIcon::Mode mode, QIcon::State) override
+    {
+        const qreal dpr = painter->device() ? painter->device()->devicePixelRatio() : 1.0;
+        painter->drawPixmap(rect, render(rect.size(), dpr, mode));
+    }
+
+    QPixmap pixmap(const QSize &size, QIcon::Mode mode, QIcon::State) override
+    {
+        return render(size, 1.0, mode);
+    }
+
+    QPixmap scaledPixmap(const QSize &size, QIcon::Mode mode, QIcon::State, qreal scale) override
+    {
+        return render(size, scale, mode);
+    }
+
+    QIconEngine *clone() const override { return new ThemedIconEngine(d_path); }
+    QString key() const override { return QStringLiteral("SciDAVisThemedIcon"); }
+    bool isNull() override { return svgSource(d_path).isEmpty(); }
+
+private:
+    QPixmap render(const QSize &size, qreal dpr, QIcon::Mode mode) const
+    {
+        if (size.isEmpty())
+            return QPixmap();
+        const QPalette palette = QApplication::palette();
+        QColor color = palette.color(QPalette::Active, QPalette::WindowText);
+        QColor accent = palette.color(QPalette::Active, QPalette::Highlight);
+        if (mode == QIcon::Disabled) {
+            color = palette.color(QPalette::Disabled, QPalette::WindowText);
+            accent = color;
+        } else if (mode == QIcon::Selected) {
+            color = accent = palette.color(QPalette::Active, QPalette::HighlightedText);
+        }
+
+        const QString key = QStringLiteral("themed:%1:%2x%3@%4:%5:%6")
+                                    .arg(d_path)
+                                    .arg(size.width())
+                                    .arg(size.height())
+                                    .arg(dpr)
+                                    .arg(color.name(QColor::HexArgb), accent.name(QColor::HexArgb));
+        QPixmap pixmap;
+        if (QPixmapCache::find(key, &pixmap))
+            return pixmap;
+
+        QByteArray svg = svgSource(d_path);
+        svg.replace("currentColor", color.name(QColor::HexRgb).toLatin1());
+        svg.replace("#ACCENT", accent.name(QColor::HexRgb).toLatin1());
+        QSvgRenderer renderer(svg);
+
+        pixmap = QPixmap(size * dpr);
+        pixmap.fill(Qt::transparent);
+        {
+            QPainter painter(&pixmap);
+            painter.setRenderHint(QPainter::Antialiasing);
+            if (color.alphaF() < 1.0)
+                painter.setOpacity(color.alphaF());
+            // keep the square icon centered in non-square requests
+            const qreal side = qMin(size.width(), size.height()) * dpr;
+            renderer.render(&painter,
+                            QRectF((size.width() * dpr - side) / 2, (size.height() * dpr - side) / 2,
+                                   side, side));
+        }
+        pixmap.setDevicePixelRatio(dpr);
+        QPixmapCache::insert(key, pixmap);
+        return pixmap;
+    }
+
+    QString d_path;
+};
+
+} // namespace
 
 QIcon IconLoader::load(const QString &name)
 {
-    QIcon ret;
-    // If the icon name is empty
     if (name.isEmpty()) {
         qDebug() << "Icon name is null";
-        return ret;
+        return QIcon();
     }
+    const QString path = themedPath.arg(name);
+    if (QFile::exists(path))
+        return QIcon(new ThemedIconEngine(path));
 
-    // comment out this for now as we dont
-    // want to load icons from system theme
-    // atleast not for now.
-    /*#if QT_VERSION >= 0x040600
-      ret = QIcon::fromTheme(name);
-      if (!ret.isNull()) return ret;
-    #endif*/
-
-    QString filename;
-    (lumen_ < 100) ? filename = icon_path_.at(Dark) : filename = icon_path_.at(Light);
-
-    const QString locate(filename + "/%1/%2.svg");
-    for (int i = 0; i < sizes_.size(); i++) {
-        QString filename_custom(locate.arg(sizes_.at(i)).arg(name));
-
-        if (QFile::exists(filename_custom)) {
-            ret.addFile(filename_custom, QSize(sizes_.at(i), sizes_.at(i)));
-        }
+    // legacy bitmap resources
+    for (const QString &legacy : { QStringLiteral(":/%1.xpm"), QStringLiteral(":/%1.png") }) {
+        if (QFile::exists(legacy.arg(name)))
+            return QIcon(QPixmap(legacy.arg(name)));
     }
+    qDebug() << "Couldn't load icon" << name;
+    return QIcon();
+}
 
-    if (ret.isNull()) {
-        qDebug() << "Couldn't load icon" << name;
-    }
-    return ret;
+QPixmap IconLoader::pixmap(const QString &name, int size)
+{
+    return load(name).pixmap(size, size);
 }

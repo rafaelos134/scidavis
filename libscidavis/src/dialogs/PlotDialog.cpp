@@ -44,6 +44,7 @@
 #include "ColorMapEditor.h"
 #include "QStringStdString.h"
 #include "core/column/Column.h"
+#include "IconLoader.h"
 
 #include <QTreeWidget>
 #include <QLineEdit>
@@ -998,7 +999,7 @@ void PlotDialog::setMultiLayer(MultiLayer *ml)
     boxPrintCrops->setChecked(d_ml->printCropmarksEnabled());
 
     QTreeWidgetItem *item = new QTreeWidgetItem(listBox, QStringList(ml->name()));
-    item->setIcon(0, QIcon(":/folder_open.xpm"));
+    item->setIcon(0, IconLoader::load("folder_open"));
     listBox->addTopLevelItem(item);
     listBox->setCurrentItem(item);
 
@@ -2099,9 +2100,9 @@ void PlotDialog::updateTreeWidgetItem(QTreeWidgetItem *item)
         return;
 
     if (item->isExpanded())
-        item->setIcon(0, QIcon(":/folder_open.xpm"));
+        item->setIcon(0, IconLoader::load("folder_open"));
     else
-        item->setIcon(0, QIcon(":/folder_closed.xpm"));
+        item->setIcon(0, IconLoader::load("folder_closed"));
 }
 
 void PlotDialog::updateBackgroundTransparency(int alpha)
@@ -2382,7 +2383,7 @@ void PlotDialog::closeEvent(QCloseEvent *e)
 LayerItem::LayerItem(Graph *g, QTreeWidgetItem *parent, const QString &s)
     : QTreeWidgetItem(parent, QStringList(s), LayerTreeItem), d_graph(g)
 {
-    setIcon(0, QPixmap(":/layer_disabled.xpm"));
+    setIcon(0, IconLoader::load("layer_disabled"));
     if (g)
         insertCurvesList();
 }
@@ -2390,9 +2391,9 @@ LayerItem::LayerItem(Graph *g, QTreeWidgetItem *parent, const QString &s)
 void LayerItem::setActive(bool on)
 {
     if (on)
-        setIcon(0, QPixmap(":/layer_enabled.xpm"));
+        setIcon(0, IconLoader::load("layer_enabled"));
     else
-        setIcon(0, QPixmap(":/layer_disabled.xpm"));
+        setIcon(0, IconLoader::load("layer_disabled"));
 }
 
 void LayerItem::insertCurvesList()
@@ -2427,15 +2428,15 @@ void LayerItem::insertCurvesList()
 CurveTreeItem::CurveTreeItem(const QwtPlotItem *curve, LayerItem *parent, const QString &s)
     : QTreeWidgetItem(parent, QStringList(s), PlotCurveTreeItem), d_curve(curve)
 {
-    setIcon(0, QPixmap(":/graph_disabled.xpm"));
+    setIcon(0, IconLoader::load("graph_disabled"));
 }
 
 void CurveTreeItem::setActive(bool on)
 {
     if (on)
-        setIcon(0, QPixmap(":/graph.xpm"));
+        setIcon(0, IconLoader::load("graph"));
     else
-        setIcon(0, QPixmap(":/graph_disabled.xpm"));
+        setIcon(0, IconLoader::load("graph_disabled"));
 }
 
 int CurveTreeItem::plotItemIndex()

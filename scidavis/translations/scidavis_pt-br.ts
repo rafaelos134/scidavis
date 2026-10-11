@@ -3438,16 +3438,16 @@ Os seguintes códigos podem ser usados:
         <translation>Tema</translation>
     </message>
     <message>
-        <source>Default</source>
-        <translation>Padrão</translation>
+        <source>System</source>
+        <translation>Sistema</translation>
+    </message>
+    <message>
+        <source>Light</source>
+        <translation>Claro</translation>
     </message>
     <message>
         <source>Dark</source>
         <translation>Escuro</translation>
-    </message>
-    <message>
-        <source>Some icons will only match the new theme after restarting SciDAVis.</source>
-        <translation>Alguns ícones só serão atualizados para o novo tema após reiniciar o SciDAVis.</translation>
     </message>
     <message>
         <source>Main Font</source>

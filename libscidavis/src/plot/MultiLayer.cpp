@@ -63,6 +63,7 @@ LayerButton::LayerButton(const QString &text, QWidget *parent) : QPushButton(tex
 {
     int btn_size = 20;
 
+    setObjectName("layerButton"); // compact style, see styles/theme.qss
     setCheckable(true);
     setChecked(true);
     setMaximumWidth(btn_size);

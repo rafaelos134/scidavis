@@ -109,7 +109,8 @@ libscidavis/src/
 |---|---|
 | `ApplicationWindow.*` | Janela principal (MDI): menus, barras de ferramentas, abrir/salvar `.sciprj`, criação de tabelas/gráficos, ligação entre todos os módulos. É o maior arquivo do projeto (~13,7 mil linhas). |
 | `globals.*`, `version.cpp` | Número de versão, diálogo "Sobre" (`SciDAVisAbout.ui`). `version.cpp` é reescrito por `scripts/makeRelease.sh`. |
-| `IconLoader.*` | Carrega ícones claros ou escuros conforme a luminosidade do tema. |
+| `IconLoader.*` | Ícones da interface: SVGs monocromáticos (`scidavis/icons/themed/`) desenhados na hora com as cores da paleta, então acompanham o tema sem precisar recriar as ações. |
+| `Theme.*` | Temas **Sistema** (segue o claro/escuro do sistema operacional), **Claro** e **Escuro**: paleta, estilo (Fusion com barras de título próprias) e a folha de estilo `scidavis/styles/theme.qss`, cujos `@tokens@` recebem as cores do tema. |
 | `customevents.h`, `SciDAVisObject.h`, `QStringStdString.h` | Eventos Qt próprios, classe-base para objetos scriptáveis, conversões de string. |
 
 ### `project/` — objetos que aparecem na árvore do projeto
@@ -332,6 +333,17 @@ SciDAVis que recebem enums continuam aceitando números inteiros.
 - **Conexões `SIGNAL()`/`SLOT()` em texto** não são verificadas pelo compilador: um sinal
   removido no Qt 6 só aparece como aviso `No such signal` ao rodar. Em código novo,
   prefira a sintaxe com ponteiros (`&Classe::sinal`).
+
+### Interface: temas e ícones
+
+- **Cores**: altere as paletas em `lightColors()`/`darkColors()` (`app/Theme.cpp`); a folha de
+  estilo `scidavis/styles/theme.qss` usa os mesmos nomes como `@tokens@`.
+- **Ícones**: use sempre `IconLoader::load("nome")`. Os SVGs ficam em `scidavis/icons/themed/`
+  (lista em `scidavis/themedicons.qrc`), usam `currentColor` para o traço e `#ACCENT` para a cor
+  de destaque. A maioria vem do [Tabler Icons](https://tabler.io/icons) (MIT); os ícones científicos
+  (box plot, superfícies 3D, campos vetoriais, grades...) são desenhados no mesmo estilo por
+  `scripts/icons/make_themed_icons.py`, que também mapeia os nomes antigos (`icon_mapping.py`).
+- Tabelas usam as cores do tema enquanto as cores de tabela das Preferências estiverem no padrão.
 
 ### Scripts auxiliares
 

@@ -30,6 +30,7 @@
 #include "core/column/Column.h"
 #include "table/future_Table.h"
 #include "table/TableModel.h"
+#include "IconLoader.h"
 #include <QString>
 #include <QBrush>
 #include <QIcon>
@@ -117,8 +118,7 @@ QVariant TableModel::data(const QModelIndex &index, int role) const
     case Qt::ForegroundRole: {
         if (col_ptr->isInvalid(index.row()))
             return QVariant(QBrush(QColor(0xff, 0, 0))); // invalid -> red letters
-        else
-            return QVariant(QBrush(QColor(0, 0, 0)));
+        return QVariant(); // the text color of the view's palette (follows the theme)
     }
     case MaskingRole:
         return QVariant(col_ptr->isMasked(row));
@@ -126,7 +126,7 @@ QVariant TableModel::data(const QModelIndex &index, int role) const
         return QVariant(col_ptr->formula(row));
     case Qt::DecorationRole:
         if (d_formula_mode)
-            return QIcon(QPixmap(":/equals.png"));
+            return IconLoader::load("equals");
         break;
     }
 

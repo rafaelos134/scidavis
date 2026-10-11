@@ -34,6 +34,7 @@
 #include "MyParser.h"
 #include "ColorButton.h"
 #include "TextFormatButtons.h"
+#include "IconLoader.h"
 
 #include <QColorDialog>
 #include <QCheckBox>
@@ -63,10 +64,6 @@
 
 AxesDialog::AxesDialog()
 {
-    QPixmap image4(":/image4.xpm");
-    QPixmap image5(":/image5.xpm");
-    QPixmap image6(":/image6.xpm");
-    QPixmap image7(":/image7.xpm");
     setWindowTitle(tr("General Plot Options"));
 
     initScalesPage();
@@ -172,17 +169,12 @@ void AxesDialog::initScalesPage()
 
     rightLayout->setRowStretch(3, 1);
 
-    QPixmap image0(":/bottom_scl.xpm");
-    QPixmap image1(":/left_scl.xpm");
-    QPixmap image2(":/top_scl.xpm");
-    QPixmap image3(":/right_scl.xpm");
-
     axesList = new QListWidget();
-    axesList->addItem(new QListWidgetItem(image0, tr("Bottom")));
-    axesList->addItem(new QListWidgetItem(image1, tr("Left")));
-    axesList->addItem(new QListWidgetItem(image2, tr("Top")));
-    axesList->addItem(new QListWidgetItem(image3, tr("Right")));
-    axesList->setIconSize(image0.size());
+    axesList->addItem(new QListWidgetItem(IconLoader::load("bottom_scl"), tr("Bottom")));
+    axesList->addItem(new QListWidgetItem(IconLoader::load("left_scl"), tr("Left")));
+    axesList->addItem(new QListWidgetItem(IconLoader::load("top_scl"), tr("Top")));
+    axesList->addItem(new QListWidgetItem(IconLoader::load("right_scl"), tr("Right")));
+    axesList->setIconSize(QSize(32, 32));
     axesList->setCurrentRow(-1);
 
     // calculate a sensible width for the items list
@@ -299,13 +291,11 @@ void AxesDialog::initGridPage()
     rightLayout->setRowStretch(6, 1);
     rightLayout->setColumnStretch(4, 1);
 
-    QPixmap image2(":/image2.xpm");
-    QPixmap image3(":/image3.xpm");
 
     axesGridList = new QListWidget();
-    axesGridList->addItem(new QListWidgetItem(image3, tr("Horizontal")));
-    axesGridList->addItem(new QListWidgetItem(image2, tr("Vertical")));
-    axesGridList->setIconSize(image3.size());
+    axesGridList->addItem(new QListWidgetItem(IconLoader::load("grid_horizontal"), tr("Horizontal")));
+    axesGridList->addItem(new QListWidgetItem(IconLoader::load("grid_vertical"), tr("Vertical")));
+    axesGridList->setIconSize(QSize(32, 32));
     axesGridList->setCurrentRow(-1);
 
     // calculate a sensible width for the items list
@@ -345,10 +335,6 @@ void AxesDialog::initGridPage()
 void AxesDialog::initAxesPage()
 {
     // axes page
-    QPixmap image4(":/image4.xpm");
-    QPixmap image5(":/image5.xpm");
-    QPixmap image6(":/image6.xpm");
-    QPixmap image7(":/image7.xpm");
 
     axesPage = new QWidget();
 
@@ -363,12 +349,11 @@ void AxesDialog::initAxesPage()
     boxAxisType->addItem(tr("Column Headings"), (int)Graph::AxisType::ColHeader);
 
     axesTitlesList = new QListWidget();
-    axesTitlesList->addItem(new QListWidgetItem(image4, tr("Bottom")));
-    axesTitlesList->addItem(new QListWidgetItem(image5, tr("Left")));
-    axesTitlesList->addItem(new QListWidgetItem(image6, tr("Top")));
-    axesTitlesList->addItem(new QListWidgetItem(image7, tr("Right")));
-    axesTitlesList->setIconSize(image6.size());
-    axesTitlesList->setMaximumWidth((int)(image6.width() * 1.5));
+    axesTitlesList->addItem(new QListWidgetItem(IconLoader::load("bottom_scl"), tr("Bottom")));
+    axesTitlesList->addItem(new QListWidgetItem(IconLoader::load("left_scl"), tr("Left")));
+    axesTitlesList->addItem(new QListWidgetItem(IconLoader::load("top_scl"), tr("Top")));
+    axesTitlesList->addItem(new QListWidgetItem(IconLoader::load("right_scl"), tr("Right")));
+    axesTitlesList->setIconSize(QSize(32, 32));
     axesTitlesList->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));
     axesTitlesList->setCurrentRow(-1);
 

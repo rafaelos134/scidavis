@@ -27,6 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "ColorButton.h"
+#include "IconLoader.h"
 
 #include <QColorDialog>
 #include <QPalette>
@@ -104,7 +105,7 @@ void ColorButton::init()
         }
     }
     const int btn_size = 28;
-    selectButton = new QPushButton(QPixmap(":/palette.xpm"), QString(), this);
+    selectButton = new QPushButton(IconLoader::load("palette"), QString(), this);
     selectButton->setMinimumWidth(btn_size);
     selectButton->setMinimumHeight(btn_size);
 

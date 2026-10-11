@@ -56,6 +56,7 @@
 #include "ApplicationWindow.h"
 #include "core/column/Column.h"
 #include "MultiLayer.h"
+#include "IconLoader.h"
 
 #include <QApplication>
 #include <QBitmap>
@@ -4246,8 +4247,8 @@ void Graph::showPlotErrorMessage(QWidget *parent, const QStringList &emptyColumn
 void Graph::showTitleContextMenu()
 {
     QMenu titleMenu(this);
-    titleMenu.addAction(QPixmap(":/cut.xpm"), tr("&Cut"), this, SLOT(cutTitle()));
-    titleMenu.addAction(QPixmap(":/copy.xpm"), tr("&Copy"), this, SLOT(copyTitle()));
+    titleMenu.addAction(IconLoader::load("cut"), tr("&Cut"), this, SLOT(cutTitle()));
+    titleMenu.addAction(IconLoader::load("copy"), tr("&Copy"), this, SLOT(copyTitle()));
     titleMenu.addAction(tr("&Delete"), this, SLOT(removeTitle()));
     titleMenu.addSeparator();
     titleMenu.addAction(tr("&Properties..."), this, SIGNAL(viewTitleDialog()));
@@ -4292,8 +4293,8 @@ void Graph::showAxisTitleMenu(int axis)
     selectedAxis = axis;
 
     QMenu titleMenu(this);
-    titleMenu.addAction(QPixmap(":/cut.xpm"), tr("&Cut"), this, SLOT(cutAxisTitle()));
-    titleMenu.addAction(QPixmap(":/copy.xpm"), tr("&Copy"), this, SLOT(copyAxisTitle()));
+    titleMenu.addAction(IconLoader::load("cut"), tr("&Cut"), this, SLOT(cutAxisTitle()));
+    titleMenu.addAction(IconLoader::load("copy"), tr("&Copy"), this, SLOT(copyAxisTitle()));
     titleMenu.addAction(tr("&Delete"), this, SLOT(removeAxisTitle()));
     titleMenu.addSeparator();
     switch (axis) {
@@ -4322,7 +4323,7 @@ void Graph::showAxisContextMenu(int axis)
     selectedAxis = axis;
 
     QMenu menu(this);
-    menu.addAction(QPixmap(":/unzoom.xpm"), tr("&Rescale to show all"),
+    menu.addAction(IconLoader::load("unzoom"), tr("&Rescale to show all"),
                    QKeySequence(tr("Ctrl+Shift+R")), this, SLOT(setAutoScale()));
     menu.addSeparator();
     menu.addAction(tr("&Hide axis"), this, SLOT(hideSelectedAxis()));

@@ -2,6 +2,7 @@
 set( HEADERS
   "src/app/ApplicationWindow.h"
   "src/app/IconLoader.h"
+  "src/app/Theme.h"
   "src/app/globals.h"
   "src/plot/Graph.h"
   "src/plot/3d/Graph3D.h"
@@ -164,6 +165,7 @@ set( HEADERS
 set( SRCS
   "src/app/ApplicationWindow.cpp"
   "src/app/IconLoader.cpp"
+  "src/app/Theme.cpp"
   "src/plot/Graph.cpp"
   "src/plot/3d/Graph3D.cpp"
   "src/project/Table.cpp"

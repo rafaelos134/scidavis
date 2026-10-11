@@ -29,6 +29,7 @@
 
 #include "TextFormatButtons.h"
 #include "SymbolDialog.h"
+#include "IconLoader.h"
 #include <QTextEdit>
 #include <QPushButton>
 #include <QHBoxLayout>
@@ -46,19 +47,19 @@ TextFormatButtons::TextFormatButtons(QTextEdit *textEdit, QWidget *parent) : QWi
     QFont font = this->font();
     font.setPointSize(14);
 
-    buttonCurve = new QPushButton(QPixmap(":/lineSymbol.xpm"), QString());
+    buttonCurve = new QPushButton(IconLoader::load("lineSymbol"), QString());
     buttonCurve->setMaximumWidth(40);
     buttonCurve->setMinimumHeight(35);
     buttonCurve->setFont(font);
     layout->addWidget(buttonCurve);
 
-    buttonSubscript = new QPushButton(QPixmap(":/index.xpm"), QString());
+    buttonSubscript = new QPushButton(IconLoader::load("index"), QString());
     buttonSubscript->setMaximumWidth(40);
     buttonSubscript->setMinimumHeight(35);
     buttonSubscript->setFont(font);
     layout->addWidget(buttonSubscript);
 
-    buttonSuperscript = new QPushButton(QPixmap(":/exp.xpm"), QString());
+    buttonSuperscript = new QPushButton(IconLoader::load("exp"), QString());
     buttonSuperscript->setMaximumWidth(40);
     buttonSuperscript->setMinimumHeight(35);
     buttonSuperscript->setFont(font);

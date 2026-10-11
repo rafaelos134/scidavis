@@ -628,6 +628,7 @@ public slots:
     void dragEnterEvent(QDragEnterEvent *e);
     void dropEvent(QDropEvent *e);
     void customEvent(QEvent *e);
+    void changeEvent(QEvent *event) override;
     //@}
 
     //! \name Dialogs
@@ -1005,7 +1006,7 @@ public:
 
     QColor workspaceColor, panelsColor, panelsTextColor;
     QString appStyle, workingDir;
-    //! Either "default" (system look) or "dark"
+    //! "system" (follow the platform), "light" or "dark", see Theme
     QString appTheme;
 
     //! Path to the folder where the last template file was opened/saved

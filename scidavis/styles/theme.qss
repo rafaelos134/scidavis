@@ -1,0 +1,261 @@
+/* SciDAVis theme style sheet, shared by the light and the dark theme.
+ * Loaded by Theme::apply() (libscidavis/src/app/Theme.cpp) on top of the Fusion style and
+ * the theme palette; @name@ tokens are replaced by the theme colors.
+ * Input fields (combo and spin boxes) are left to Fusion and the palette: styling their
+ * frames here would also require restyling their arrows. */
+
+/* ---- menus ------------------------------------------------------------------------- */
+QMenuBar {
+    background: @window@;
+    border-bottom: 1px solid @border@;
+    padding: 2px 4px;
+}
+QMenuBar::item {
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: transparent;
+}
+QMenuBar::item:selected, QMenuBar::item:pressed {
+    background: @hover@;
+}
+QMenu {
+    background: @surface@;
+    border: 1px solid @border@;
+    border-radius: 8px;
+    padding: 5px;
+}
+QMenu::item {
+    padding: 5px 24px 5px 8px;
+    border-radius: 5px;
+}
+QMenu::item:selected {
+    background: @accent@;
+    color: @accentText@;
+}
+QMenu::item:disabled {
+    color: @disabledText@;
+}
+QMenu::separator {
+    height: 1px;
+    background: @border@;
+    margin: 5px 8px;
+}
+
+/* ---- tool bars ----------------------------------------------------------------------- */
+QToolBar {
+    background: @window@;
+    border: none;
+    padding: 3px 4px;
+    spacing: 2px;
+}
+QToolBar::separator {
+    background: @border@;
+    width: 1px;
+    margin: 5px 5px;
+}
+QToolBar::handle {
+    width: 8px;
+}
+QToolButton {
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 3px;
+}
+QToolButton:hover {
+    background: @hover@;
+}
+QToolButton:pressed, QToolButton:checked {
+    background: @accentSoft@;
+    border-color: @accent@;
+}
+QToolButton[popupMode="1"] {
+    padding-right: 12px;
+}
+QToolButton::menu-button {
+    border: none;
+    width: 12px;
+}
+
+/* ---- buttons ----------------------------------------------------------------------------- */
+QPushButton {
+    background: @button@;
+    border: 1px solid @border@;
+    border-radius: 6px;
+    padding: 5px 14px;
+    min-height: 18px;
+}
+QPushButton:hover {
+    background: @buttonHover@;
+}
+QPushButton:pressed, QPushButton:checked {
+    background: @accentSoft@;
+}
+QPushButton:default {
+    border-color: @accent@;
+}
+QPushButton:disabled {
+    color: @disabledText@;
+}
+/* layer selectors of graph windows ("1", "2", ...) */
+QPushButton#layerButton {
+    padding: 0;
+    min-height: 0;
+    border-radius: 4px;
+    font-size: 8pt;
+}
+QPushButton#layerButton:checked {
+    background: @accent@;
+    border-color: @accent@;
+    color: @accentText@;
+}
+
+/* ---- tabs and group boxes ------------------------------------------------------------------ */
+QTabWidget::pane {
+    border: 1px solid @border@;
+    border-radius: 8px;
+    top: -1px;
+    background: @window@;
+}
+QTabBar::tab {
+    background: transparent;
+    color: @mutedText@;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 6px 14px;
+    margin-right: 2px;
+}
+QTabBar::tab:hover {
+    color: @text@;
+}
+QTabBar::tab:selected {
+    color: @text@;
+    border-bottom: 2px solid @accent@;
+}
+QGroupBox {
+    border: 1px solid @border@;
+    border-radius: 8px;
+    margin-top: 16px;
+    padding: 8px 6px 6px 6px;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 10px;
+    padding: 0 4px;
+    color: @mutedText@;
+}
+
+/* ---- tables, lists and trees ----------------------------------------------------------------- */
+QHeaderView::section {
+    background: @window@;
+    color: @text@;
+    border: none;
+    border-right: 1px solid @border@;
+    border-bottom: 1px solid @border@;
+    padding: 4px 6px;
+}
+QTableView {
+    gridline-color: @border@;
+}
+QTableCornerButton::section {
+    background: @window@;
+    border: none;
+    border-right: 1px solid @border@;
+    border-bottom: 1px solid @border@;
+}
+
+/* page list of the preferences dialog */
+QListWidget#configSidebar {
+    background: @window@;
+    border: none;
+    outline: none;
+    padding: 4px;
+}
+QListWidget#configSidebar::item {
+    padding: 8px 10px;
+    margin: 1px 0;
+    border-radius: 6px;
+    color: @text@;
+}
+QListWidget#configSidebar::item:hover {
+    background: @hover@;
+}
+QListWidget#configSidebar::item:selected {
+    background: @accent@;
+    color: @accentText@;
+}
+QLabel#configPageHeader {
+    font-size: 15pt;
+    font-weight: 600;
+    padding: 2px 2px 6px 2px;
+}
+
+/* ---- scroll bars ------------------------------------------------------------------------- */
+QScrollBar:vertical {
+    background: transparent;
+    width: 12px;
+    margin: 0;
+}
+QScrollBar:horizontal {
+    background: transparent;
+    height: 12px;
+    margin: 0;
+}
+QScrollBar::handle:vertical {
+    background: @border@;
+    border-radius: 4px;
+    min-height: 28px;
+    margin: 2px 3px;
+}
+QScrollBar::handle:horizontal {
+    background: @border@;
+    border-radius: 4px;
+    min-width: 28px;
+    margin: 3px 2px;
+}
+QScrollBar::handle:hover {
+    background: @mutedText@;
+}
+QScrollBar::add-line, QScrollBar::sub-line {
+    width: 0;
+    height: 0;
+}
+QScrollBar::add-page, QScrollBar::sub-page {
+    background: transparent;
+}
+
+/* ---- misc ----------------------------------------------------------------------------------- */
+QToolTip {
+    color: @text@;
+    background: @toolTip@;
+    border: 1px solid @border@;
+    border-radius: 6px;
+    padding: 4px 6px;
+}
+QStatusBar {
+    background: @window@;
+    border-top: 1px solid @border@;
+}
+QDockWidget::title {
+    background: @window@;
+    padding: 6px 8px;
+    text-align: left;
+}
+QSplitter::handle {
+    background: @border@;
+}
+QSplitter::handle:horizontal {
+    width: 1px;
+}
+QSplitter::handle:vertical {
+    height: 1px;
+}
+
+/* The "Type" tabs of tables and matrices hard-code a light gray background in their .ui files
+ * (future/table/controltabs.ui, future/matrix/matrixcontroltabs.ui). */
+QTextEdit#type_info {
+    background: @alternateBase@;
+    color: @text@;
+    border: 1px solid @border@;
+    border-radius: 6px;
+}

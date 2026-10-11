@@ -2,6 +2,7 @@ set( RESOURCES
   "appicons.qrc"
   "icons.qrc"
   "styles.qrc"
+  "themedicons.qrc"
   )
 
 if( WIN32 )

@@ -208,6 +208,10 @@ void Table::setTextFont(const QFont &fnt)
 
 void Table::setHeaderColor(const QColor &col)
 {
+    if (!col.isValid()) { // follow the application palette
+        d_view_widget->horizontalHeader()->setPalette(QPalette());
+        return;
+    }
     QPalette palette;
     palette.setColor(QPalette::WindowText, col);
     d_view_widget->horizontalHeader()->setPalette(palette);

@@ -32,6 +32,8 @@
 #include "Graph.h"
 #include "Matrix.h"
 #include "ColorButton.h"
+#include "IconLoader.h"
+#include "Theme.h"
 
 #include <QLocale>
 #include <QPushButton>
@@ -43,6 +45,8 @@
 #include <QColorDialog>
 #include <QTabWidget>
 #include <QStackedWidget>
+#include <QLineEdit>
+#include <QAbstractSpinBox>
 #include <QWidget>
 #include <QComboBox>
 #include <QSpinBox>
@@ -75,14 +79,13 @@ ConfigDialog::ConfigDialog(QWidget *parent, Qt::WindowFlags fl) : QDialog(parent
     legendFont = app->plotLegendFont;
     titleFont = app->plotTitleFont;
 
-    QPalette pal;
-    pal.setColor(QPalette::Window, app->palette().color(QPalette::Window));
-
     // create the GUI
     generalDialog = new QStackedWidget();
     itemsList = new QListWidget();
-    itemsList->setSpacing(10);
-    itemsList->setAlternatingRowColors(true);
+    itemsList->setObjectName("configSidebar"); // styled in styles/theme.qss
+    itemsList->setFrameShape(QFrame::NoFrame);
+    itemsList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    itemsList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     initAppPage();
     initTablesPage();
@@ -96,15 +99,27 @@ ConfigDialog::ConfigDialog(QWidget *parent, Qt::WindowFlags fl) : QDialog(parent
     generalDialog->addWidget(plots3D);
     generalDialog->addWidget(fitPage);
 
+    // forms: give the extra width to the columns holding input widgets, so that labels stay
+    // next to their fields instead of drifting apart on wide pages
+    for (QGridLayout *grid : generalDialog->findChildren<QGridLayout *>()) {
+        if (grid->columnCount() < 2)
+            continue;
+        for (int col = 0; col < grid->columnCount(); col++) {
+            bool input = false;
+            for (int row = 0; row < grid->rowCount() && !input; row++) {
+                QLayoutItem *item = grid->itemAtPosition(row, col);
+                QWidget *w = item ? item->widget() : nullptr;
+                input = qobject_cast<QComboBox *>(w) || qobject_cast<QAbstractSpinBox *>(w)
+                        || qobject_cast<QLineEdit *>(w)
+                        || (qobject_cast<QPushButton *>(w) && grid->columnCount() == 2);
+            }
+            grid->setColumnStretch(col, input ? 1 : 0);
+        }
+    }
+
     QVBoxLayout *rightLayout = new QVBoxLayout();
     lblPageHeader = new QLabel();
-    QFont fnt = this->font();
-    fnt.setPointSize(fnt.pointSize() + 3);
-    fnt.setBold(true);
-    lblPageHeader->setFont(fnt);
-
-    lblPageHeader->setPalette(pal);
-    lblPageHeader->setAutoFillBackground(true);
+    lblPageHeader->setObjectName("configPageHeader"); // styled in styles/theme.qss
 
     rightLayout->setSpacing(10);
     rightLayout->addWidget(lblPageHeader);
@@ -517,63 +532,57 @@ void ConfigDialog::initAppPage()
     insertLanguagesList();
     topBoxLayout->addWidget(boxLanguage, 0, 1);
 
-    lblStyle = new QLabel();
-    topBoxLayout->addWidget(lblStyle, 1, 0);
-    boxStyle = new QComboBox();
-    topBoxLayout->addWidget(boxStyle, 1, 1);
-    QStringList styles = QStyleFactory::keys();
-    styles.sort();
-    boxStyle->addItems(styles);
-    boxStyle->setCurrentIndex(boxStyle->findText(app->appStyle, Qt::MatchWildcard));
+    // the widget style is part of the theme; the former style selector is kept hidden
+    lblStyle = new QLabel(this);
+    boxStyle = new QComboBox(this);
+    lblStyle->hide();
+    boxStyle->hide();
 
     lblTheme = new QLabel();
-    topBoxLayout->addWidget(lblTheme, 2, 0);
+    topBoxLayout->addWidget(lblTheme, 1, 0);
     boxTheme = new QComboBox();
-    boxTheme->addItems(QStringList() << QString() << QString()); // texts set in languageChange()
-    boxTheme->setCurrentIndex(app->appTheme == "dark" ? 1 : 0);
-    topBoxLayout->addWidget(boxTheme, 2, 1);
-    // the dark theme always uses the Fusion style
-    boxStyle->setEnabled(boxTheme->currentIndex() == 0);
-    connect(boxTheme, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
-            [this](int index) { boxStyle->setEnabled(index == 0); });
+    // order of Theme::Mode; texts set in languageChange()
+    boxTheme->addItems(QStringList() << QString() << QString() << QString());
+    boxTheme->setCurrentIndex(static_cast<int>(Theme::fromString(app->appTheme)));
+    topBoxLayout->addWidget(boxTheme, 1, 1);
 
     lblFonts = new QLabel();
-    topBoxLayout->addWidget(lblFonts, 3, 0);
+    topBoxLayout->addWidget(lblFonts, 2, 0);
     fontsBtn = new QPushButton();
-    topBoxLayout->addWidget(fontsBtn, 3, 1);
+    topBoxLayout->addWidget(fontsBtn, 2, 1);
 
     lblScriptingLanguage = new QLabel();
-    topBoxLayout->addWidget(lblScriptingLanguage, 4, 0);
+    topBoxLayout->addWidget(lblScriptingLanguage, 3, 0);
     boxScriptingLanguage = new QComboBox();
     QStringList llist = ScriptingLangManager::languages();
     boxScriptingLanguage->addItems(llist);
     boxScriptingLanguage->setCurrentIndex(llist.indexOf(app->defaultScriptingLang));
-    topBoxLayout->addWidget(boxScriptingLanguage, 4, 1);
+    topBoxLayout->addWidget(boxScriptingLanguage, 3, 1);
 
     boxSave = new QCheckBox();
     boxSave->setChecked(app->autoSave);
-    topBoxLayout->addWidget(boxSave, 5, 0);
+    topBoxLayout->addWidget(boxSave, 4, 0);
 
     boxMinutes = new QSpinBox();
     boxMinutes->setRange(1, 100);
     boxMinutes->setValue(app->autoSaveTime);
     boxMinutes->setEnabled(app->autoSave);
-    topBoxLayout->addWidget(boxMinutes, 5, 1);
+    topBoxLayout->addWidget(boxMinutes, 4, 1);
 
     lblUndoLimit = new QLabel();
-    topBoxLayout->addWidget(lblUndoLimit, 6, 0);
+    topBoxLayout->addWidget(lblUndoLimit, 5, 0);
     boxUndoLimit = new QSpinBox();
     boxUndoLimit->setRange(1, 10000);
     boxUndoLimit->setValue(app->undoLimit);
-    topBoxLayout->addWidget(boxUndoLimit, 6, 1);
+    topBoxLayout->addWidget(boxUndoLimit, 5, 1);
 
 #ifdef SEARCH_FOR_UPDATES
     boxSearchUpdates = new QCheckBox();
     boxSearchUpdates->setChecked(app->autoSearchUpdates);
-    topBoxLayout->addWidget(boxSearchUpdates, 7, 0, 1, 2);
+    topBoxLayout->addWidget(boxSearchUpdates, 6, 0, 1, 2);
 #endif
 
-    topBoxLayout->setRowStretch(8, 1);
+    topBoxLayout->setRowStretch(7, 1);
 
     appTabWidget->addTab(application, QString());
 
@@ -607,7 +616,8 @@ void ConfigDialog::initAppPage()
 
     colorsBoxLayout->setRowStretch(3, 1);
 
-    appTabWidget->addTab(appColors, QString());
+    // workspace and panel colors are defined by the theme now
+    appColors->hide();
 
     numericFormatPage = new QWidget();
     QVBoxLayout *numLayout = new QVBoxLayout(numericFormatPage);
@@ -833,12 +843,12 @@ void ConfigDialog::languageChange()
     itemsList->addItem(tr("3D Plots"));
     itemsList->addItem(tr("Fitting"));
     itemsList->setCurrentRow(0);
-    itemsList->item(0)->setIcon(QIcon(QPixmap(":/general.xpm")));
-    itemsList->item(1)->setIcon(QIcon(QPixmap(":/configTable.xpm")));
-    itemsList->item(2)->setIcon(QIcon(QPixmap(":/config_curves.xpm")));
-    itemsList->item(3)->setIcon(QIcon(QPixmap(":/3dplots.xpm")));
-    itemsList->item(4)->setIcon(QIcon(QPixmap(":/fit.xpm")));
-    itemsList->setIconSize(QSize(32, 32));
+    itemsList->item(0)->setIcon(IconLoader::load("general"));
+    itemsList->item(1)->setIcon(IconLoader::load("configTable"));
+    itemsList->item(2)->setIcon(IconLoader::load("config_curves"));
+    itemsList->item(3)->setIcon(IconLoader::load("3dplots"));
+    itemsList->item(4)->setIcon(IconLoader::load("fit"));
+    itemsList->setIconSize(QSize(20, 20));
     // calculate a sensible width for the items list
     // (default QListWidget size is 256 which looks too big)
     QFontMetrics fm(itemsList->font());
@@ -848,9 +858,8 @@ void ConfigDialog::languageChange()
         if (newWidth > width)
             width = newWidth;
     }
-    itemsList->setMaximumWidth(itemsList->iconSize().width() + width + 50);
-    // resize the list to the maximum width
-    itemsList->resize(itemsList->maximumWidth(), itemsList->height());
+    // fixed, so that the layout cannot squeeze the page names
+    itemsList->setFixedWidth(itemsList->iconSize().width() + width + 64);
 
     // plots 2D page
     plotsTabWidget->setTabText(plotsTabWidget->indexOf(plotOptions), tr("Options"));
@@ -924,8 +933,9 @@ void ConfigDialog::languageChange()
     lblLanguage->setText(tr("Language"));
     lblStyle->setText(tr("Style"));
     lblTheme->setText(tr("Theme"));
-    boxTheme->setItemText(0, tr("Default"));
-    boxTheme->setItemText(1, tr("Dark"));
+    boxTheme->setItemText(0, tr("System"));
+    boxTheme->setItemText(1, tr("Light"));
+    boxTheme->setItemText(2, tr("Dark"));
     lblFonts->setText(tr("Main Font"));
     fontsBtn->setText(tr("Choose &font"));
     lblWorkspace->setText(tr("Workspace"));
@@ -1001,16 +1011,16 @@ void ConfigDialog::languageChange()
     lblSymbSize->setText(tr("Symbol size"));
 
     boxCurveStyle->clear();
-    boxCurveStyle->addItem(QPixmap(":/lPlot.xpm"), tr(" Line"));
-    boxCurveStyle->addItem(QPixmap(":/pPlot.xpm"), tr(" Scatter"));
-    boxCurveStyle->addItem(QPixmap(":/lpPlot.xpm"), tr(" Line + Symbol"));
-    boxCurveStyle->addItem(QPixmap(":/dropLines.xpm"), tr(" Vertical drop lines"));
-    boxCurveStyle->addItem(QPixmap(":/spline.xpm"), tr(" Spline"));
-    boxCurveStyle->addItem(QPixmap(":/vert_steps.xpm"), tr(" Vertical steps"));
-    boxCurveStyle->addItem(QPixmap(":/hor_steps.xpm"), tr(" Horizontal steps"));
-    boxCurveStyle->addItem(QPixmap(":/area.xpm"), tr(" Area"));
-    boxCurveStyle->addItem(QPixmap(":/vertBars.xpm"), tr(" Vertical Bars"));
-    boxCurveStyle->addItem(QPixmap(":/hBars.xpm"), tr(" Horizontal Bars"));
+    boxCurveStyle->addItem(IconLoader::load("lPlot"), tr(" Line"));
+    boxCurveStyle->addItem(IconLoader::load("pPlot"), tr(" Scatter"));
+    boxCurveStyle->addItem(IconLoader::load("lpPlot"), tr(" Line + Symbol"));
+    boxCurveStyle->addItem(IconLoader::load("dropLines"), tr(" Vertical drop lines"));
+    boxCurveStyle->addItem(IconLoader::load("spline"), tr(" Spline"));
+    boxCurveStyle->addItem(IconLoader::load("vert_steps"), tr(" Vertical steps"));
+    boxCurveStyle->addItem(IconLoader::load("hor_steps"), tr(" Horizontal steps"));
+    boxCurveStyle->addItem(IconLoader::load("area"), tr(" Area"));
+    boxCurveStyle->addItem(IconLoader::load("vertBars"), tr(" Vertical Bars"));
+    boxCurveStyle->addItem(IconLoader::load("hBars"), tr(" Horizontal Bars"));
 
     int style = app->defaultCurveStyle;
     if (style == Graph::Line)
@@ -1140,14 +1150,7 @@ void ConfigDialog::apply()
     // general page: application tab
     app->changeAppFont(appFont);
     setFont(appFont);
-    app->changeAppStyle(boxStyle->currentText());
-    const QString theme = boxTheme->currentIndex() == 1 ? "dark" : "default";
-    if (theme != app->appTheme) {
-        app->changeAppTheme(theme);
-        QMessageBox::information(this, tr("Theme"),
-                                 tr("Some icons will only match the new theme after "
-                                    "restarting SciDAVis."));
-    }
+    app->changeAppTheme(Theme::toString(static_cast<Theme::Mode>(boxTheme->currentIndex())));
 #ifdef SEARCH_FOR_UPDATES
     app->autoSearchUpdates = boxSearchUpdates->isChecked();
 #endif
@@ -1231,9 +1234,8 @@ void ConfigDialog::apply()
         if (newWidth > width)
             width = newWidth;
     }
-    itemsList->setMaximumWidth(itemsList->iconSize().width() + width + 50);
-    // resize the list to the maximum width
-    itemsList->resize(itemsList->maximumWidth(), itemsList->height());
+    // fixed, so that the layout cannot squeeze the page names
+    itemsList->setFixedWidth(itemsList->iconSize().width() + width + 64);
 
     auto &settings = ApplicationWindow::getSettings();
     settings.beginGroup("[Table]");
