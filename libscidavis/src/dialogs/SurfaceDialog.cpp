@@ -29,6 +29,7 @@
 #include "SurfaceDialog.h"
 #include "MyParser.h"
 #include "ApplicationWindow.h"
+#include "BracketHighlighter.h"
 
 #include <QMessageBox>
 #include <QLayout>
@@ -45,6 +46,7 @@ SurfaceDialog::SurfaceDialog(QWidget *parent, Qt::WindowFlags fl) : QDialog(pare
 
     boxFunction = new QComboBox();
     boxFunction->setEditable(true);
+    BracketHighlighter::attach(boxFunction);
 
     QBoxLayout *bl1 = new QBoxLayout(QBoxLayout::LeftToRight);
     bl1->addWidget(new QLabel(tr("f(x,y)=")), 1);

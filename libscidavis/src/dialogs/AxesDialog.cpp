@@ -35,6 +35,7 @@
 #include "ColorButton.h"
 #include "TextFormatButtons.h"
 #include "IconLoader.h"
+#include "BracketHighlighter.h"
 
 #include <QColorDialog>
 #include <QCheckBox>
@@ -492,6 +493,7 @@ void AxesDialog::initAxesPage()
     rightBoxLayout->addWidget(boxShowFormula, 6, 0);
 
     boxFormula = new QTextEdit();
+    BracketHighlighter::attach(boxFormula);
     boxFormula->setAcceptRichText(false);
     boxFormula->setMaximumHeight(3 * metrics.height());
     boxFormula->hide();

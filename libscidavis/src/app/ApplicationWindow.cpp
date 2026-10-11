@@ -111,6 +111,7 @@
 #include "TranslateCurveTool.h"
 #include "MultiPeakFitTool.h"
 #include "LineProfileTool.h"
+#include "BracketHighlighter.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10059,6 +10060,7 @@ void ApplicationWindow::applyWorkspaceColors()
     d_workspace.setBackground(Theme::colors().workspace);
     lv.setPalette(QPalette());
     results->setPalette(QPalette());
+    BracketHighlighter::updateAll(); // bracket colors depend on light/dark
 }
 
 void ApplicationWindow::changeEvent(QEvent *event)

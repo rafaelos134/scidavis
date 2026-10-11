@@ -31,6 +31,7 @@
  ***************************************************************************/
 #include "ScriptEdit.h"
 #include "Note.h"
+#include "BracketHighlighter.h"
 
 #include <QAction>
 #include <QMenu>
@@ -54,6 +55,7 @@ ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, QString name)
     setLineWrapMode(NoWrap);
     setAcceptRichText(false);
     setFontFamily("Monospace");
+    BracketHighlighter::attach(this);
 
     d_fmt_default.setBackground(palette().brush(QPalette::Base));
     d_fmt_success.setBackground(QBrush(QColor(128, 255, 128)));

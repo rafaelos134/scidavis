@@ -38,6 +38,7 @@
 #include "NonLinearFit.h"
 #include "SigmoidalFit.h"
 #include "Matrix.h"
+#include "BracketHighlighter.h"
 #include <muParserError.h>
 
 #include <QListWidget>
@@ -103,6 +104,7 @@ void FitDialog::initFitPage()
     lblFunction = new QLabel();
     gl1->addWidget(lblFunction, 1, 1);
     boxFunction = new QTextEdit();
+    BracketHighlighter::attach(boxFunction);
     boxFunction->setReadOnly(true);
     QPalette palette = boxFunction->palette();
     palette.setColor(QPalette::Active, QPalette::Base, Qt::lightGray);
@@ -283,6 +285,7 @@ void FitDialog::initEditPage()
     gb->setLayout(gl2);
 
     editBox = new QTextEdit();
+    BracketHighlighter::attach(editBox);
     editBox->setAcceptRichText(false);
     editBox->setFocus();
 

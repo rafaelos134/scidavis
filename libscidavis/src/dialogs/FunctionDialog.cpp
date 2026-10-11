@@ -30,6 +30,7 @@
 #include "MyParser.h"
 #include "ApplicationWindow.h"
 #include "FunctionCurve.h"
+#include "BracketHighlighter.h"
 
 #include <QTextEdit>
 #include <QLineEdit>
@@ -63,6 +64,7 @@ FunctionDialog::FunctionDialog(QWidget *parent, Qt::WindowFlags fl) : QDialog(pa
     QGridLayout *gl1 = new QGridLayout();
     gl1->addWidget(new QLabel(tr("f(x)= ")), 0, 0);
     boxFunction = new QTextEdit();
+    BracketHighlighter::attach(boxFunction);
     boxFunction->setMinimumWidth(350);
     gl1->addWidget(boxFunction, 0, 1);
     gl1->addWidget(new QLabel(tr("From x= ")), 1, 0);
@@ -100,10 +102,12 @@ FunctionDialog::FunctionDialog(QWidget *parent, Qt::WindowFlags fl) : QDialog(pa
     gl2->addWidget(new QLabel(tr("x = ")), 3, 0);
     boxXFunction = new QComboBox();
     boxXFunction->setEditable(true);
+    BracketHighlighter::attach(boxXFunction);
     gl2->addWidget(boxXFunction, 3, 1);
     gl2->addWidget(new QLabel(tr("y = ")), 4, 0);
     boxYFunction = new QComboBox();
     boxYFunction->setEditable(true);
+    BracketHighlighter::attach(boxYFunction);
     gl2->addWidget(boxYFunction, 4, 1);
     gl2->addWidget(new QLabel(tr("Points")), 5, 0);
     boxParPoints = new QSpinBox();
@@ -132,10 +136,12 @@ FunctionDialog::FunctionDialog(QWidget *parent, Qt::WindowFlags fl) : QDialog(pa
     gl3->addWidget(new QLabel(tr("R =")), 4, 0);
     boxPolarRadius = new QComboBox();
     boxPolarRadius->setEditable(true);
+    BracketHighlighter::attach(boxPolarRadius);
     gl3->addWidget(boxPolarRadius, 4, 1);
     gl3->addWidget(new QLabel(tr("Theta =")), 5, 0);
     boxPolarTheta = new QComboBox();
     boxPolarTheta->setEditable(true);
+    BracketHighlighter::attach(boxPolarTheta);
     gl3->addWidget(boxPolarTheta, 5, 1);
     gl3->addWidget(new QLabel(tr("Points")), 6, 0);
     boxPolarPoints = new QSpinBox();

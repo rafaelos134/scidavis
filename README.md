@@ -344,6 +344,10 @@ SciDAVis que recebem enums continuam aceitando números inteiros.
   (box plot, superfícies 3D, campos vetoriais, grades...) são desenhados no mesmo estilo por
   `scripts/icons/make_themed_icons.py`, que também mapeia os nomes antigos (`icon_mapping.py`).
 - Tabelas usam as cores do tema enquanto as cores de tabela das Preferências estiverem no padrão.
+- **Parênteses coloridos**: `BracketHighlighter::attach(campo)` (`widgets/BracketHighlighter.*`) colore
+  `()`, `[]` e `{}` por nível, marca fechamentos sem abertura e destaca o par junto ao cursor. Já está
+  ligado em notas/scripts, fórmulas de coluna e matriz, funções de gráfico, superfície 3D, editor de
+  ajuste e fórmula de eixo; use-o em qualquer novo campo de fórmula.
 
 ### Scripts auxiliares
 
