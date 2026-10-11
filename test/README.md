@@ -1,12 +1,12 @@
-# Testes
+# Tests
 
-- `*.cpp` — testes em C++ com GoogleTest (executável `unittest`); `utils.h` e
-  `ApplicationWindowTest.h` têm as funções auxiliares.
-- `python/` — scripts executados dentro do SciDAVis (`scidavis -x script.py`) quando o projeto é
-  configurado com `-DSCRIPTING_PYTHON=ON`.
-- `data/` — projetos (`.sciprj`) e arquivos do Origin (`.opj`) abertos pelos testes; copiados para
-  a pasta de build pelo `CMakeLists.txt`.
-- `reference/menus/` — menus esperados; o teste compara com os menus gerados pela execução.
+- `*.cpp` — C++ tests with GoogleTest (the `unittest` executable); `utils.h` and
+  `ApplicationWindowTest.h` hold the helpers.
+- `python/` — scripts run inside SciDAVis (`scidavis -x script.py`) when the project is configured
+  with `-DSCRIPTING_PYTHON=ON`.
+- `data/` — projects (`.sciprj`) and Origin files (`.opj`) opened by the tests; copied to the build
+  folder by `CMakeLists.txt`.
+- `reference/menus/` — expected menus, compared with the menus written by the test run.
 
-Rodar: configure com `-DBUILD_TESTS=ON` e use `ctest --output-on-failure` na pasta de build
-(em servidores sem tela, `xvfb-run ctest ...`).
+Run them: configure with `-DBUILD_TESTS=ON` and use `ctest --output-on-failure` in the build folder
+(on headless machines, `xvfb-run ctest ...`).

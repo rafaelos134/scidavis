@@ -32,11 +32,12 @@
 
   <screenshots>
     <screenshot type="default">
-      <caption>A 3D plot</caption>
-      <image>https://github.com/highperformancecoder/scidavis/raw/master/docs/screenshots/Screen1.png</image>
+      <caption>A table and a 2D plot</caption>
+      <image>https://github.com/rafaelos134/scidavis/raw/master/docs/screenshots/scidavis-light.png</image>
     </screenshot>
     <screenshot>
-      <image>https://github.com/highperformancecoder/scidavis/raw/master/docs/screenshots/Screen2.png</image>
+      <caption>The dark theme</caption>
+      <image>https://github.com/rafaelos134/scidavis/raw/master/docs/screenshots/scidavis-dark.png</image>
     </screenshot>
   </screenshots>
 

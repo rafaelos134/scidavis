@@ -1,72 +1,76 @@
-# Como contribuir com o SciDAVis
+# Contributing to SciDAVis
 
-Obrigado pelo interesse! Este guia mostra o caminho mais curto do zero até a sua primeira
-contribuição. Para entender o projeto por dentro (módulos, arquitetura, onde estão os cálculos),
-veja o [README.md](README.md).
+**English** | [Português](CONTRIBUTING.pt-BR.md)
 
-## 1. Preparar o ambiente
+Thanks for your interest! This guide is the shortest path from zero to your first contribution.
+To understand the project from the inside (modules, architecture, where the calculations are), see
+the [README](README.md) and the [wiki](https://github.com/rafaelos134/scidavis/wiki).
 
-Requisitos: Qt 6.8 LTS, compilador com C++20 (GCC 11+, Clang 14+ ou MSVC 2022), CMake 3.16+,
-GSL, muParser e zlib. O passo a passo completo para Linux está na seção 6 do README; em resumo:
+## 1. Set up the environment
+
+Requirements: Qt 6.8 LTS, a C++20 compiler (GCC 11+, Clang 14+ or MSVC 2022), CMake 3.16+, GSL,
+muParser and zlib. The complete Linux walkthrough is in the README; in short:
 
 ```bash
-git clone --recursive <url-do-repositório> scidavis
+git clone --recursive https://github.com/rafaelos134/scidavis.git
 cd scidavis
 cmake -S . -B build -G Ninja -DCMAKE_PREFIX_PATH=$HOME/Qt/6.8.3/gcc_64 -DBUILD_TESTS=ON
 cmake --build build -j$(nproc)
 ./build/scidavis/scidavis
 ```
 
-Já clonou sem `--recursive`? Rode `git submodule update --init --recursive`.
+Cloned without `--recursive`? Run `git submodule update --init --recursive`.
 
-## 2. Encontrar algo para fazer
+## 2. Find something to work on
 
-- [docs/ROADMAP.md](docs/ROADMAP.md) lista melhorias planejadas, com o passo a passo e os
-  arquivos envolvidos em cada uma.
-- Bugs e pedidos ficam nas issues do GitHub.
+- [docs/ROADMAP.md](docs/ROADMAP.md) (in Portuguese) lists planned improvements, with the steps and
+  the files involved in each of them.
+- Bugs and feature requests are tracked in the GitHub issues.
 
-## 3. Onde fica cada coisa
+## 3. Where things are
 
-| Quero mexer em... | Pasta |
+| I want to work on... | Folder |
 |---|---|
-| Cálculos (ajustes, FFT, integração, estatística) | `libscidavis/src/analysis/` |
-| Gráficos 2D e 3D | `libscidavis/src/plot/` |
-| Tabelas, matrizes, notas, pastas do projeto | `libscidavis/src/project/` e `libscidavis/src/future/` |
-| Janelas de diálogo | `libscidavis/src/dialogs/` |
-| Componentes visuais reutilizáveis | `libscidavis/src/widgets/` |
-| Fórmulas e scripts (muParser/Python) | `libscidavis/src/scripting/` |
-| Janela principal, temas, ícones | `libscidavis/src/app/` e `scidavis/resources/` |
-| Traduções | `scidavis/translations/` |
-| Testes | `test/` |
-| Documentação | `docs/` |
+| Calculations (fits, FFT, integration, statistics) | `libscidavis/src/analysis/` |
+| 2D and 3D plots | `libscidavis/src/plot/` |
+| Tables, matrices, notes, project folders | `libscidavis/src/project/` and `libscidavis/src/future/` |
+| Dialog boxes | `libscidavis/src/dialogs/` |
+| Reusable visual components | `libscidavis/src/widgets/` |
+| Formulas and scripts (muParser/Python) | `libscidavis/src/scripting/` |
+| Main window, themes, icons | `libscidavis/src/app/` and `scidavis/resources/` |
+| Translations | `scidavis/translations/` |
+| Tests | `test/` |
+| Documentation | `docs/` and the [wiki](https://github.com/rafaelos134/scidavis/wiki) |
 
-## 4. Regras do código
+## 4. Code rules
 
-- **Arquivo novo**: coloque na pasta do módulo e acrescente nas listas `HEADERS`/`SRCS` de
-  `libscidavis/CMakeLists.txt`. Os `#include` usam só o nome do arquivo (`#include "Graph.h"`):
-  todas as pastas de módulo já estão no include path.
-- **Estilo**: rode `clang-format -i <arquivo>` antes do commit (regras em `.clang-format`).
-  Para fazer isso automaticamente: `ln -s ../../scripts/pre-commit.py .git/hooks/pre-commit`.
-- **Ícones**: sempre `IconLoader::load("nome")`, com o SVG em `scidavis/resources/icons/themed/`
-  (veja "Interface: temas e ícones" no README). Não use bitmaps nem cores fixas na interface.
-- **Campos de fórmula**: chame `BracketHighlighter::attach(campo)` para colorir os parênteses.
-- **Sinais e slots**: prefira `connect(obj, &Classe::sinal, ...)`. A forma com `SIGNAL()`/`SLOT()`
-  não é verificada pelo compilador.
-- **Textos da interface**: sempre dentro de `tr("...")`, em inglês. As traduções ficam nos `.ts`.
-- **Mover arquivos**: use `git mv` para preservar o histórico.
+- **New file**: put it in the module folder and add it to the `HEADERS`/`SRCS` lists of
+  `libscidavis/CMakeLists.txt`. Includes use the file name only (`#include "Graph.h"`): every module
+  folder is already on the include path.
+- **Style**: run `clang-format -i <file>` before committing (rules in `.clang-format`). To do it
+  automatically: `ln -s ../../scripts/pre-commit.py .git/hooks/pre-commit`.
+- **Icons**: always `IconLoader::load("name")`, with the SVG in `scidavis/resources/icons/themed/`
+  (see [Themes and icons](https://github.com/rafaelos134/scidavis/wiki/Themes-and-Icons) on the
+  wiki). No bitmaps and no hard-coded colors in the interface.
+- **Formula inputs**: call `BracketHighlighter::attach(input)` to color the brackets.
+- **Signals and slots**: prefer `connect(obj, &Class::signal, ...)`. The `SIGNAL()`/`SLOT()` form
+  is not checked by the compiler.
+- **User-visible text**: always inside `tr("...")`, in English. Translations live in the `.ts` files.
+- **Moving files**: use `git mv` to keep the history.
 
-## 5. Testar
+## 5. Test
 
 ```bash
-cd build && ctest --output-on-failure     # em servidor sem tela: xvfb-run ctest ...
+cd build && ctest --output-on-failure     # on a headless machine: xvfb-run ctest ...
 ```
 
-Mudou algo visível? Teste nos temas claro e escuro (Editar → Preferências → Tema). Mexeu em
-números? Teste com o programa em português (vírgula decimal) e em inglês (ponto decimal).
+Changed something visible? Check it with the light and the dark theme (Edit → Preferences → Theme).
+Touched numbers? Check it with the interface in Portuguese (decimal comma) and in English (decimal
+point).
 
-## 6. Enviar a contribuição
+## 6. Submit your contribution
 
-1. Crie uma branch a partir de `master` (`git checkout -b minha-melhoria`).
-2. Faça commits pequenos, cada um com uma mensagem que explique *o que* e *por quê*.
-3. Abra um pull request descrevendo a mudança e como você testou. O CI compila e testa em Linux,
-   Windows e macOS automaticamente.
+1. Create a branch from `master` (`git checkout -b my-improvement`).
+2. Make small commits, each with a message that explains *what* and *why*.
+3. Open a pull request describing the change and how you tested it. The CI builds and tests on
+   Linux, Windows and macOS automatically.
